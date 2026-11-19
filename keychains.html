@@ -110,7 +110,6 @@ function getScaledContours(text){
  }));
  return {paths,scale,minX,minY,maxX,maxY};
 }
-function offsetSilhouette(text,offsetMm,holePosition){
 
 function offsetSilhouette(text,offsetMm,holePosition){
  const data=getScaledContours(text),co=new ClipperLib.ClipperOffset(3,0.25*1000);
