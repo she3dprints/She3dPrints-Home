@@ -10,17 +10,19 @@
 header{padding:22px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--oat)}
 .logo{font-weight:800;letter-spacing:1px}a{color:var(--taupe)}
 main{max-width:1050px;margin:35px auto;padding:0 18px}
-h1{font-size:clamp(28px,5vw,42px);margin:0 0 8px} .intro{color:var(--taupe);margin-bottom:26px}
+h1{font-size:clamp(28px,5vw,42px);margin:0 0 8px}.intro{color:var(--taupe);margin-bottom:26px}
 .layout{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 .panel{background:white;border:1px solid var(--oat);border-radius:18px;padding:22px}
 #preview{height:320px;background:var(--milk);border-radius:14px;overflow:hidden}
+#preview canvas{display:block;width:100%;height:100%}
 label{display:block;font-weight:700;margin:16px 0 8px}
 input,select{width:100%;padding:12px;border:1px solid var(--oat);border-radius:10px;background:#fff;color:var(--espresso);font-size:16px}
 .swatches{display:flex;gap:10px;flex-wrap:wrap}
-.swatch{width:34px;height:34px;border-radius:50%;border:2px solid #ddd;cursor:pointer}
+.swatch{width:34px;height:34px;border-radius:50%;border:2px solid #ddd;cursor:pointer;flex:0 0 34px}
 .swatch.selected{outline:3px solid var(--taupe);outline-offset:2px}
+.swatch:focus-visible{outline:3px solid var(--rose);outline-offset:3px}
 .price{font-size:25px;font-weight:800;margin:18px 0;color:var(--taupe)}
-button{border:0;border-radius:12px;background:var(--espresso);color:white;padding:14px 18px;font-weight:700;font-size:16px;width:100%;cursor:pointer}
+button.order{border:0;border-radius:12px;background:var(--espresso);color:white;padding:14px 18px;font-weight:700;font-size:16px;width:100%;cursor:pointer}
 small{color:var(--taupe);line-height:1.5;display:block;margin-top:12px}
 @media(max-width:700px){.layout{grid-template-columns:1fr}#preview{height:280px}}
 </style>
@@ -36,43 +38,118 @@ small{color:var(--taupe);line-height:1.5;display:block;margin-top:12px}
 <label for="name">Your name (letters only)</label>
 <input id="name" maxlength="20" placeholder="Enter a name" value="ASMA">
 <label>Base colour</label><div id="baseSwatches" class="swatches"></div>
-<label>Letter colour</label><div id="letterSwatches" class="swatches"></div>
+<label>Top/name colour</label><div id="letterSwatches" class="swatches"></div>
 <label for="hole">Keyring hole position</label>
 <select id="hole"><option value="top">Top</option><option value="left">Left side</option><option value="right">Right side</option></select>
 <div class="price" id="price">Rs. 350</div>
-<button id="order">Order on WhatsApp</button>
-<small>1–5 letters: Rs. 350 · 6–8 letters: Rs. 450 · 9+ letters: Rs. 550<br>Preview is a visual guide; final lettering and proportions may vary slightly.</small>
+<button class="order" id="order">Order on WhatsApp</button>
+<small>1–5 letters: Rs. 350 · 6–8 letters: Rs. 450 · 9+ letters: Rs. 550<br>The supplied STL model is used for the 3D body preview. The name is shown as a live colour preview.</small>
 </section></div></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
 <script>
-const colours=[["Milk","#FBF7F4"],["Blush Oat","#E8D8CE"],["Dusty Rose","#B98F88"],["Cocoa Taupe","#7A6258"],["Espresso Brown","#3B2F2A"],["Black","#222222"],["White","#FFFFFF"],["Olive","#68704A"],["Peach","#E9A58F"],["Lavender","#B8A5C9"]];
-let base="#B98F88", letter="#FBF7F4";
-function swatches(id,which){const el=document.getElementById(id);colours.forEach(([n,c],i)=>{const b=document.createElement("button");b.type="button";b.className="swatch"+((which==="base"?c===base:c===letter)?" selected":"");b.style.background=c;b.title=n;b.setAttribute("aria-label",n);b.onclick=()=>{if(which==="base")base=c;else letter=c;swatches("baseSwatches","base");swatches("letterSwatches","letter");update()};el.appendChild(b)})}
-swatches("baseSwatches","base");swatches("letterSwatches","letter");
-const scene=new THREE.Scene();scene.background=new THREE.Color("#FBF7F4");
-const camera=new THREE.PerspectiveCamera(35,1,.1,100);camera.position.set(0,0,8);
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));document.getElementById("preview").appendChild(renderer.domElement);
-const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
-scene.add(new THREE.AmbientLight(0xffffff,.8));const light=new THREE.DirectionalLight(0xffffff,1.2);light.position.set(3,4,6);scene.add(light);
-let group=new THREE.Group();scene.add(group);
-function makeText(text,color,size){const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=1024;canvas.height=256;ctx.clearRect(0,0,1024,256);ctx.fillStyle=color;ctx.font="bold 170px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(text.slice(0,20),512,128,950);const tex=new THREE.CanvasTexture(canvas);const mat=new THREE.MeshStandardMaterial({map:tex,transparent:true});const mesh=new THREE.Mesh(new THREE.PlaneGeometry(size, size*.25),mat);mesh.position.z=.13;return mesh}
-function update(){while(group.children.length){const o=group.children.pop();o.geometry?.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose()}}
-const name=(document.getElementById("name").value||"NAME").replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,20)||"NAME";
-const width=Math.max(2.8,Math.min(5.4,name.length*.43+.7));
-const body=new THREE.Mesh(new THREE.BoxGeometry(width,1.25,.22),new THREE.MeshStandardMaterial({color:base,roughness:.55}));group.add(body);
-const hole=document.getElementById("hole").value;let hx=0,hy=.52;
-if(hole==="left"){hx=-width/2+.13;hy=0}else if(hole==="right"){hx=width/2-.13;hy=0}
-const ring=new THREE.Mesh(new THREE.TorusGeometry(.105,.045,16,40),new THREE.MeshStandardMaterial({color:"#7A6258",metalness:.35,roughness:.35}));ring.position.set(hx,hy,.18);group.add(ring);
-group.add(makeText(name,letter,Math.min(width-.45,name.length*.39+.6)));
-group.rotation.set(0,0,0);
+const colours=[
+ ["Dark green","#174C38"],["Matcha green","#A8B98A"],["Black","#222222"],
+ ["White","#FFFFFF"],["Brown","#79513A"],["Pink","#E7A1B5"]
+];
+let base=colours[0][1], letter=colours[3][1];
+function swatches(id,which){
+ const el=document.getElementById(id);
+ el.replaceChildren(); // Clear old buttons before rebuilding: prevents duplicate swatches.
+ colours.forEach(([name,hex])=>{
+  const b=document.createElement("button");
+  b.type="button";b.className="swatch"+((which==="base"?hex===base:hex===letter)?" selected":"");
+  b.style.background=hex;b.title=name;b.setAttribute("aria-label",name);
+  if(hex==="#FFFFFF")b.style.borderColor="#aaa";
+  b.setAttribute("aria-pressed",String(which==="base"?hex===base:hex===letter));
+  b.onclick=()=>{
+   if(which==="base")base=hex;else letter=hex;
+   swatches("baseSwatches","base");swatches("letterSwatches","letter");updateMaterials();
+  };
+  el.appendChild(b);
+ });
 }
-document.getElementById("name").addEventListener("input",()=>{const el=document.getElementById("name");el.value=el.value.replace(/[^a-zA-Z]/g,"").toUpperCase();update();price()});
-document.getElementById("hole").addEventListener("change",update);
+swatches("baseSwatches","base");swatches("letterSwatches","letter");
+
+const preview=document.getElementById("preview");
+const scene=new THREE.Scene();scene.background=new THREE.Color("#FBF7F4");
+const camera=new THREE.PerspectiveCamera(35,1,.1,1000);camera.position.set(0,0,125);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));preview.appendChild(renderer.domElement);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
+scene.add(new THREE.AmbientLight(0xffffff,.85));
+const light=new THREE.DirectionalLight(0xffffff,1.15);light.position.set(30,45,80);scene.add(light);
+const modelGroup=new THREE.Group();scene.add(modelGroup);
+const baseMaterial=new THREE.MeshStandardMaterial({color:base,roughness:.55,metalness:.02});
+let bodyMesh=null,nameMesh=null,nameMaterial=null,modelDepth=8;
+const loader=new THREE.STLLoader();
+const modelFiles={top:"Topways.stl",left:"Sideways.stl",right:"Sideways.stl"};
+let loadToken=0;
+function clearModel(){
+ while(modelGroup.children.length){
+  const obj=modelGroup.children[0];modelGroup.remove(obj);
+  if(obj.geometry)obj.geometry.dispose();
+  if(obj.material && obj.material!==baseMaterial){if(Array.isArray(obj.material))obj.material.forEach(m=>m.dispose());else obj.material.dispose();}
+ }
+ bodyMesh=null;nameMesh=null;nameMaterial=null;
+}
+function loadModel(position){
+ const token=++loadToken;clearModel();
+ loader.load(modelFiles[position],geometry=>{
+  if(token!==loadToken){geometry.dispose();return;}
+  geometry.computeBoundingBox();
+  const box=geometry.boundingBox;
+  const center=new THREE.Vector3();box.getCenter(center);
+  geometry.translate(-center.x,-center.y,-center.z);
+  const size=new THREE.Vector3();box.getSize(size);
+  const scale=78/Math.max(size.x,size.y);
+  geometry.scale(scale,scale,scale);
+  modelDepth=size.z*scale;
+  bodyMesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:base,roughness:.58}));
+  if(position==="right")bodyMesh.scale.x=-1;
+  modelGroup.add(bodyMesh);
+  addName();
+  addName();
+ },undefined,error=>{
+  console.error("Could not load keychain STL:",error);
+  preview.innerHTML='<p style="padding:24px;color:#7A6258">The 3D model could not be loaded. Please check that Topways.stl and Sideways.stl are in the same folder as keychains.html.</p>';
+ });
+}
+function addName(){
+ if(nameMesh){modelGroup.remove(nameMesh);nameMesh.geometry.dispose();nameMesh.material.map?.dispose();nameMesh.material.dispose();}
+ const name=(document.getElementById("name").value||"NAME").replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,20)||"NAME";
+ const canvas=document.createElement("canvas");canvas.width=1200;canvas.height=320;
+ const ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.fillStyle=letter;ctx.textAlign="center";ctx.textBaseline="middle";
+ let fontSize=220;ctx.font=`bold ${fontSize}px Arial`;
+ while(ctx.measureText(name).width>1080 && fontSize>70){fontSize-=8;ctx.font=`bold ${fontSize}px Arial`;}
+ ctx.fillText(name,600,160,1080);
+ const texture=new THREE.CanvasTexture(canvas);texture.encoding=THREE.sRGBEncoding;
+ nameMaterial=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false,side:THREE.DoubleSide});
+ const width=Math.min(63,Math.max(25,name.length*10.5));
+ nameMesh=new THREE.Mesh(new THREE.PlaneGeometry(width,width*320/1200),nameMaterial);
+ nameMesh.position.set(0,0,modelDepth/2+.12);modelGroup.add(nameMesh);
+}
+function updateMaterials(){
+ if(bodyMesh)bodyMesh.material.color.set(base);
+ addName();
+}
+document.getElementById("name").addEventListener("input",()=>{
+ const el=document.getElementById("name");el.value=el.value.replace(/[^a-zA-Z]/g,"").toUpperCase();addName();price();
+});
+document.getElementById("hole").addEventListener("change",e=>loadModel(e.target.value));
 function price(){const n=document.getElementById("name").value.length;document.getElementById("price").textContent="Rs. "+(n<=5?350:n<=8?450:550)}
-function resize(){const w=document.getElementById("preview").clientWidth,h=document.getElementById("preview").clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)}
-window.addEventListener("resize",resize);resize();update();price();
+function resize(){const w=preview.clientWidth,h=preview.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)}
+window.addEventListener("resize",resize);resize();loadModel("top");price();
 function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
-document.getElementById("order").onclick=()=>{const n=document.getElementById("name").value.trim();if(!n){alert("Please enter a name.");return}const p=n.length<=5?350:n.length<=8?450:550;const holeText=document.getElementById("hole").selectedOptions[0].text;const msg=`Hello She3DPrints! I'd like to order a custom name keychain.\\nName: ${n}\\nBase colour: ${base}\\nLetter colour: ${letter}\\nHole position: ${holeText}\\nPrice: Rs. ${p}\\nThank you!`;window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank")};
+document.getElementById("order").onclick=()=>{
+ const n=document.getElementById("name").value.trim();if(!n){alert("Please enter a name.");return}
+ const p=n.length<=5?350:n.length<=8?450:550;
+ const holeText=document.getElementById("hole").selectedOptions[0].text;
+ const colourName=hex=>colours.find(c=>c[1]===hex)?.[0]||hex;
+ const msg=`Hello She3DPrints! I'd like to order a custom name keychain.\nName: ${n}\nBase colour: ${colourName(base)}\nTop/name colour: ${colourName(letter)}\nHole position: ${holeText}\nPrice: Rs. ${p}\nThank you!`;
+ window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+};
 </script>
 </body></html>
