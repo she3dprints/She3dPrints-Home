@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FBF7F4">
+<title>She3DPrints | Little things, made your way</title>
+<meta name="description" content="Personalised 3D-printed goodies, made just for you. Explore custom clickers and custom name keychains by She3DPrints.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+ --milk:#FBF7F4; --oat:#E8D8CE; --rose:#B98F88;
+ --taupe:#7A6258; --espresso:#3B2F2A; --white:#fffdfb;
+ --serif:"Playfair Display", Georgia, serif; --sans:"DM Sans",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--milk);color:var(--espresso);font-family:var(--sans);line-height:1.6}
+a{color:inherit;text-decoration:none}
+button,a{-webkit-tap-highlight-color:transparent}
+.site-header{height:82px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,6vw,84px);background:rgba(251,247,244,.94);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(59,47,42,.08);backdrop-filter:blur(12px)}
+.brand{font-family:var(--serif);font-weight:700;font-size:25px;letter-spacing:.04em}
+.brand span{color:var(--rose)}
+.nav{display:flex;align-items:center;gap:30px;font-size:13px;font-weight:600}
+.nav a{transition:color .2s}.nav a:hover{color:var(--rose)}
+.nav-cta{padding:11px 18px;border-radius:999px;background:var(--espresso);color:var(--milk)}
+.menu-button{display:none;border:0;background:none;color:var(--espresso);font-size:26px}
+.hero{padding:66px clamp(20px,6vw,84px) 76px;display:grid;grid-template-columns:1.02fr .98fr;gap:46px;align-items:center;max-width:1440px;margin:auto}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--taupe);font-weight:700}
+h1,h2,h3,p{margin-top:0}
+h1{font:700 clamp(45px,6.4vw,82px)/1.05 var(--serif);letter-spacing:-.045em;margin:17px 0 22px;max-width:650px}
+h1 em{font-style:normal;color:var(--rose)}
+.hero-copy>p{font-size:17px;color:#74645d;max-width:460px;line-height:1.85}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.button{display:inline-flex;align-items:center;justify-content:center;padding:14px 22px;border-radius:999px;font-size:13px;font-weight:700;transition:transform .2s,box-shadow .2s}
+.button:hover{transform:translateY(-2px);box-shadow:0 9px 22px #3b2f2a18}
+.button.primary{background:var(--espresso);color:var(--milk)}
+.button.secondary{border:1px solid var(--rose);color:var(--espresso);background:transparent}
+.hero-art{min-height:430px;border-radius:46% 46% 24px 24px;background:var(--oat);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.hero-art:before,.hero-art:after{content:"";position:absolute;border:1px solid rgba(122,98,88,.18);border-radius:50%;width:360px;height:360px}
+.hero-art:after{width:460px;height:460px}
+.art-note{position:absolute;bottom:25px;right:25px;background:var(--milk);padding:11px 16px;border-radius:30px;font:italic 13px var(--serif);z-index:2}
+.product-still{position:relative;width:min(78%,390px);height:300px;z-index:1}
+.keychain{position:absolute;width:175px;height:175px;border-radius:30px;background:var(--rose);left:8%;top:16%;transform:rotate(-12deg);box-shadow:12px 18px 0 rgba(59,47,42,.12);display:grid;place-items:center}
+.keychain:before{content:"";position:absolute;width:19px;height:19px;border:5px solid var(--milk);border-radius:50%;top:-15px;left:calc(50% - 9px)}
+.keychain span{font:700 42px var(--serif);color:var(--milk)}
+.clicker{position:absolute;width:205px;height:145px;border-radius:25px;background:var(--espresso);right:1%;bottom:8%;transform:rotate(9deg);box-shadow:12px 18px 0 rgba(59,47,42,.13);padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.clicker i{display:block;border-radius:10px;background:var(--oat);box-shadow:inset 0 -4px 0 rgba(59,47,42,.12)}
+.clicker i:nth-child(2),.clicker i:nth-child(6){background:var(--rose)}
+.sparkle{position:absolute;color:var(--taupe);font-size:30px;z-index:2}.s1{top:17%;right:18%}.s2{bottom:18%;left:12%;font-size:22px}
+.section{padding:82px clamp(20px,6vw,84px);max-width:1440px;margin:auto}
+.section-head{text-align:center;max-width:620px;margin:0 auto 38px}
+.section-head h2{font:700 clamp(32px,4vw,48px)/1.15 var(--serif);margin:12px 0}
+.section-head p{color:#786a63;font-size:14px}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.choice-card{background:var(--white);border:1px solid rgba(59,47,42,.08);border-radius:24px;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.choice-card:hover{transform:translateY(-5px);box-shadow:0 18px 45px #3b2f2a12}
+.card-visual{height:270px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.card-visual.clicker-bg{background:#E8D8CE}
+.card-visual.key-bg{background:#E9DFD7}
+.mini-clicker{width:220px;height:150px;background:var(--espresso);border-radius:24px;padding:19px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;transform:rotate(-7deg);box-shadow:0 18px 28px #3b2f2a2a}
+.mini-clicker b{border-radius:10px;background:var(--milk);box-shadow:inset 0 -5px 0 #00000012}
+.mini-clicker b:nth-child(2),.mini-clicker b:nth-child(5){background:var(--rose)}
+.name-tag{width:245px;height:104px;border-radius:24px;background:var(--rose);display:grid;place-items:center;color:var(--milk);font:700 38px var(--serif);letter-spacing:.04em;transform:rotate(7deg);box-shadow:0 17px 25px #3b2f2a25;position:relative}
+.name-tag:before{content:"";position:absolute;width:17px;height:17px;border:5px solid var(--milk);border-radius:50%;top:-17px;left:calc(50% - 8px)}
+.card-content{padding:25px 27px 28px}
+.card-content h3{font:700 27px var(--serif);margin:0 0 8px}
+.card-content p{color:#786a63;font-size:14px;min-height:45px;margin-bottom:20px}
+.text-link{font-size:13px;font-weight:700;color:var(--taupe);display:inline-flex;gap:10px;align-items:center}
+.text-link span{font-size:19px;transition:transform .2s}.text-link:hover span{transform:translateX(4px)}
+.about{background:var(--oat);max-width:none;padding-top:78px;padding-bottom:78px}
+.about-inner{max-width:1050px;margin:auto;display:grid;grid-template-columns:.75fr 1.25fr;gap:65px;align-items:center}
+.about-stamp{aspect-ratio:1;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;text-align:center;color:var(--milk);font:600 clamp(25px,3vw,38px)/1.2 var(--serif);padding:35px;transform:rotate(-7deg);max-width:300px;margin:auto}
+.about-copy h2{font:700 clamp(34px,4vw,48px)/1.15 var(--serif);margin:12px 0 20px}
+.about-copy p{color:#67564f;font-size:15px;line-height:1.9}
+.footer{background:var(--espresso);color:var(--milk);padding:48px clamp(20px,6vw,84px) 25px}
+.footer-inner{max-width:1270px;margin:auto;display:flex;justify-content:space-between;gap:35px;align-items:flex-start}
+.footer .brand{font-size:24px}.footer p{color:#d6c7c0;font-size:13px;max-width:300px;margin-top:12px}
+.footer-links{display:flex;gap:28px;flex-wrap:wrap;font-size:13px;color:#e6d9d2}
+.footer-bottom{max-width:1270px;margin:35px auto 0;padding-top:18px;border-top:1px solid #ffffff25;color:#c4b4ac;font-size:11px;display:flex;justify-content:space-between;gap:15px}
+@media(max-width:760px){
+ .site-header{height:70px}.brand{font-size:21px}.menu-button{display:block}.nav{display:none;position:absolute;top:69px;left:0;right:0;background:var(--milk);padding:20px 24px 25px;flex-direction:column;align-items:flex-start;gap:18px;border-bottom:1px solid #3b2f2a18}.nav.open{display:flex}
+ .hero{grid-template-columns:1fr;padding-top:43px;gap:32px}.hero-art{min-height:330px}.product-still{transform:scale(.83)}h1{font-size:53px}
+ .section{padding-top:62px;padding-bottom:62px}.choice-grid{grid-template-columns:1fr;gap:17px}.card-visual{height:235px}
+ .about-inner{grid-template-columns:1fr;gap:32px}.about-stamp{max-width:190px}
+ .footer-inner{flex-direction:column}.footer-bottom{flex-direction:column}
+}
+@media(min-width:761px) and (max-width:980px){.hero{gap:25px}.hero-art{min-height:360px}.product-still{transform:scale(.82)}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="#" aria-label="She3DPrints home">SHE<span>3D</span>PRINTS</a>
+  <button class="menu-button" aria-label="Open menu" aria-expanded="false" onclick="toggleMenu()">☰</button>
+  <nav class="nav" id="nav">
+    <a href="#home" onclick="closeMenu()">Home</a>
+    <a href="#customise" onclick="closeMenu()">Customise</a>
+    <a href="#about" onclick="closeMenu()">About us</a>
+    <a href="#contact" class="nav-cta" onclick="closeMenu()">Get in touch</a>
+  </nav>
+</header>
+
+<main>
+<section class="hero" id="home">
+  <div class="hero-copy">
+    <div class="eyebrow">A little something, made yours</div>
+    <h1>Little things.<br><em>Made your way.</em></h1>
+    <p>Personalised 3D-printed goodies, made with care and customised just the way you like them.</p>
+    <div class="actions">
+      <a class="button primary" href="#customise">Explore customisations <span aria-hidden="true">&nbsp;↗</span></a>
+      <a class="button secondary" href="#about">Our little story</a>
+    </div>
+  </div>
+  <div class="hero-art" aria-label="Illustration of a personalised keychain and fidget clicker">
+    <span class="sparkle s1">✳</span><span class="sparkle s2">✧</span>
+    <div class="product-still">
+      <div class="keychain"><span>Hi!</span></div>
+      <div class="clicker"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="art-note">Designed to feel like yours ♡</div>
+  </div>
+</section>
+
+<section class="section" id="customise">
+  <div class="section-head">
+    <div class="eyebrow">Make it personal</div>
+    <h2>What would you like to customise?</h2>
+    <p>Pick your favourite and let's make something that's uniquely yours.</p>
+  </div>
+  <div class="choice-grid">
+    <article class="choice-card">
+      <div class="card-visual clicker-bg">
+        <div class="mini-clicker"><b></b><b></b><b></b><b></b><b></b><b></b></div>
+      </div>
+      <div class="card-content">
+        <h3>Custom Clickers</h3>
+        <p>Choose your keycap, colours, letters and favourite symbols.</p>
+        <a class="text-link" href="https://she3dprints.github.io/She3DPrints/">Design your clicker <span>→</span></a>
+      </div>
+    </article>
+    <article class="choice-card">
+      <div class="card-visual key-bg">
+        <div class="name-tag">your name</div>
+      </div>
+      <div class="card-content">
+        <h3>Custom Keychains</h3>
+        <p>Add a name and choose the colours to create a keychain of your own.</p>
+        <a class="text-link" href="keychains.html">Design your keychain <span>→</span></a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section about" id="about">
+  <div class="about-inner">
+    <div class="about-stamp">A little<br>curiosity,<br>a lot of love.</div>
+    <div class="about-copy">
+      <div class="eyebrow">A little about us</div>
+      <h2>It all started with curiosity.</h2>
+      <p>It started with a simple curiosity about how 3D printing works. That curiosity led me to buy my first 3D printer. As I started learning, experimenting and designing, I slowly fell in love with the process.</p>
+      <p>What began as a little hobby has now turned into a collection of 3D-printed products that you can personalise and make your own.</p>
+      <p><strong>And this is just the beginning!</strong></p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer" id="contact">
+  <div class="footer-inner">
+    <div>
+      <a class="brand" href="#">SHE<span>3D</span>PRINTS</a>
+      <p>Little things, made your way. Personalised 3D-printed goodies from Sri Lanka.</p>
+    </div>
+    <div class="footer-links">
+      <a href="#home">Home</a>
+      <a href="#customise">Customise</a>
+      <a href="#about">About us</a>
+      <a href="https://she3dprints.github.io/She3DPrints/">Custom clickers</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© <span id="year"></span> She3DPrints</span><span>Made with care in Sri Lanka</span></div>
+</footer>
+<script>
+function toggleMenu(){const n=document.getElementById('nav');n.classList.toggle('open');document.querySelector('.menu-button').setAttribute('aria-expanded',n.classList.contains('open'))}
+function closeMenu(){document.getElementById('nav').classList.remove('open');document.querySelector('.menu-button').setAttribute('aria-expanded','false')}
+document.getElementById('year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
