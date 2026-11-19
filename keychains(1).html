@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Name Keychains | She3DPrints</title>
+<style>
+:root{--milk:#FBF7F4;--oat:#E8D8CE;--rose:#B98F88;--taupe:#7A6258;--espresso:#3B2F2A}
+*{box-sizing:border-box}body{margin:0;background:var(--milk);color:var(--espresso);font-family:Arial,sans-serif}
+header{padding:22px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--oat)}
+.logo{font-weight:800;letter-spacing:1px}a{color:var(--taupe)}
+main{max-width:1050px;margin:35px auto;padding:0 18px}
+h1{font-size:clamp(28px,5vw,42px);margin:0 0 8px} .intro{color:var(--taupe);margin-bottom:26px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.panel{background:white;border:1px solid var(--oat);border-radius:18px;padding:22px}
+#preview{height:320px;background:var(--milk);border-radius:14px;overflow:hidden}
+label{display:block;font-weight:700;margin:16px 0 8px}
+input,select{width:100%;padding:12px;border:1px solid var(--oat);border-radius:10px;background:#fff;color:var(--espresso);font-size:16px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:34px;height:34px;border-radius:50%;border:2px solid #ddd;cursor:pointer}
+.swatch.selected{outline:3px solid var(--taupe);outline-offset:2px}
+.price{font-size:25px;font-weight:800;margin:18px 0;color:var(--taupe)}
+button{border:0;border-radius:12px;background:var(--espresso);color:white;padding:14px 18px;font-weight:700;font-size:16px;width:100%;cursor:pointer}
+small{color:var(--taupe);line-height:1.5;display:block;margin-top:12px}
+@media(max-width:700px){.layout{grid-template-columns:1fr}#preview{height:280px}}
+</style>
+</head>
+<body>
+<header><div class="logo">SHE3DPRINTS</div><a href="./index.html">Back to Home</a></header>
+<main>
+<h1>Custom Name Keychains</h1>
+<p class="intro">Make it yours. Choose your name, colours and keyring hole position.</p>
+<div class="layout">
+<section class="panel"><div id="preview"></div><small>Drag to rotate the 3D preview. Use your fingers to zoom on mobile.</small></section>
+<section class="panel">
+<label for="name">Your name (letters only)</label>
+<input id="name" maxlength="20" placeholder="Enter a name" value="ASMA">
+<label>Base colour</label><div id="baseSwatches" class="swatches"></div>
+<label>Letter colour</label><div id="letterSwatches" class="swatches"></div>
+<label for="hole">Keyring hole position</label>
+<select id="hole"><option value="top">Top</option><option value="left">Left side</option><option value="right">Right side</option></select>
+<div class="price" id="price">Rs. 350</div>
+<button id="order">Order on WhatsApp</button>
+<small>1–5 letters: Rs. 350 · 6–8 letters: Rs. 450 · 9+ letters: Rs. 550<br>Preview is a visual guide; final lettering and proportions may vary slightly.</small>
+</section></div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const colours=[["Milk","#FBF7F4"],["Blush Oat","#E8D8CE"],["Dusty Rose","#B98F88"],["Cocoa Taupe","#7A6258"],["Espresso Brown","#3B2F2A"],["Black","#222222"],["White","#FFFFFF"],["Olive","#68704A"],["Peach","#E9A58F"],["Lavender","#B8A5C9"]];
+let base="#B98F88", letter="#FBF7F4";
+function swatches(id,which){const el=document.getElementById(id);colours.forEach(([n,c],i)=>{const b=document.createElement("button");b.type="button";b.className="swatch"+((which==="base"?c===base:c===letter)?" selected":"");b.style.background=c;b.title=n;b.setAttribute("aria-label",n);b.onclick=()=>{if(which==="base")base=c;else letter=c;swatches("baseSwatches","base");swatches("letterSwatches","letter");update()};el.appendChild(b)})}
+swatches("baseSwatches","base");swatches("letterSwatches","letter");
+const scene=new THREE.Scene();scene.background=new THREE.Color("#FBF7F4");
+const camera=new THREE.PerspectiveCamera(35,1,.1,100);camera.position.set(0,0,8);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));document.getElementById("preview").appendChild(renderer.domElement);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
+scene.add(new THREE.AmbientLight(0xffffff,.8));const light=new THREE.DirectionalLight(0xffffff,1.2);light.position.set(3,4,6);scene.add(light);
+let group=new THREE.Group();scene.add(group);
+function makeText(text,color,size){const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=1024;canvas.height=256;ctx.clearRect(0,0,1024,256);ctx.fillStyle=color;ctx.font="bold 170px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(text.slice(0,20),512,128,950);const tex=new THREE.CanvasTexture(canvas);const mat=new THREE.MeshStandardMaterial({map:tex,transparent:true});const mesh=new THREE.Mesh(new THREE.PlaneGeometry(size, size*.25),mat);mesh.position.z=.13;return mesh}
+function update(){while(group.children.length){const o=group.children.pop();o.geometry?.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose()}}
+const name=(document.getElementById("name").value||"NAME").replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,20)||"NAME";
+const width=Math.max(2.8,Math.min(5.4,name.length*.43+.7));
+const body=new THREE.Mesh(new THREE.BoxGeometry(width,1.25,.22),new THREE.MeshStandardMaterial({color:base,roughness:.55}));group.add(body);
+const hole=document.getElementById("hole").value;let hx=0,hy=.52;
+if(hole==="left"){hx=-width/2+.13;hy=0}else if(hole==="right"){hx=width/2-.13;hy=0}
+const ring=new THREE.Mesh(new THREE.TorusGeometry(.105,.045,16,40),new THREE.MeshStandardMaterial({color:"#7A6258",metalness:.35,roughness:.35}));ring.position.set(hx,hy,.18);group.add(ring);
+group.add(makeText(name,letter,Math.min(width-.45,name.length*.39+.6)));
+group.rotation.set(0,0,0);
+}
+document.getElementById("name").addEventListener("input",()=>{const el=document.getElementById("name");el.value=el.value.replace(/[^a-zA-Z]/g,"").toUpperCase();update();price()});
+document.getElementById("hole").addEventListener("change",update);
+function price(){const n=document.getElementById("name").value.length;document.getElementById("price").textContent="Rs. "+(n<=5?350:n<=8?450:550)}
+function resize(){const w=document.getElementById("preview").clientWidth,h=document.getElementById("preview").clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h)}
+window.addEventListener("resize",resize);resize();update();price();
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
+document.getElementById("order").onclick=()=>{const n=document.getElementById("name").value.trim();if(!n){alert("Please enter a name.");return}const p=n.length<=5?350:n.length<=8?450:550;const holeText=document.getElementById("hole").selectedOptions[0].text;const msg=`Hello She3DPrints! I'd like to order a custom name keychain.\\nName: ${n}\\nBase colour: ${base}\\nLetter colour: ${letter}\\nHole position: ${holeText}\\nPrice: Rs. ${p}\\nThank you!`;window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank")};
+</script>
+</body></html>
