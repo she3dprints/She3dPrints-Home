@@ -65,18 +65,14 @@ function animate(){requestAnimationFrame(animate);if(controls)controls.update();
 function resizePreview(){if(!renderer)return;const w=preview.clientWidth,h=preview.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}
 window.addEventListener('resize',resizePreview);
 
-/* Build raised 3D lettering. SVGLoader is instantiated correctly before parse(). */
-function getNameShapes(text){
- const path=font.getPath(text,0,0,100);const pathData=path.toPathData(3);
- const svg='<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="-30 -260 1260 520"><path d="'+pathData+'" fill="black" fill-rule="evenodd"/></svg>';
- const svgLoader=new THREE.SVGLoader();
- const parsed=svgLoader.parse(svg);
- const shapes=[];parsed.paths.forEach(p=>shapes.push(...THREE.SVGLoader.createShapes(p)));
- if(!shapes.length)throw new Error('Could not create the 3D name outline.');
- const geometry=new THREE.ExtrudeGeometry(shapes,{depth:NAME_HEIGHT,bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:.16,bevelThickness:.16,curveSegments:16});
- geometry.computeBoundingBox();const bb=geometry.boundingBox;const width=bb.max.x-bb.min.x;if(!width)throw new Error('The name has no usable width.');
- const scale=Math.min(76/width,1.0);geometry.scale(scale,scale,1);geometry.computeBoundingBox();
- const cx=(geometry.boundingBox.min.x+geometry.boundingBox.max.x)/2,cy=(geometry.boundingBox.min.y+geometry.boundingBox.max.y)/2;geometry.translate(-cx,-cy,0);geometry.computeVertexNormals();return geometry;
+/* Raised name is built from the exact same outlines as the base. This keeps
+   the lettering registered directly over its base and avoids SVG font parsing. */
+function getNameGeometry(letterPaths){
+ const geometry=new THREE.ExtrudeGeometry(pathsToShapes(letterPaths),{
+  depth:NAME_HEIGHT,bevelEnabled:true,bevelSegments:3,steps:1,
+  bevelSize:.12,bevelThickness:.12,curveSegments:16
+ });
+ geometry.computeBoundingBox();geometry.computeVertexNormals();return geometry;
 }
 function getContours(text){
  const commands=font.getPath(text,0,0,100).commands,contours=[];let points=[],current={x:0,y:0},start={x:0,y:0};
@@ -97,25 +93,51 @@ function scalePaths(paths,targetWidth){const b=boundsOf(paths),w=b.maxX-b.minX;i
 function clipperUnion(paths){const c=new ClipperLib.Clipper();c.AddPaths(paths,ClipperLib.PolyType.ptSubject,true);const out=new ClipperLib.Paths();c.Execute(ClipperLib.ClipType.ctUnion,out,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);return out;}
 function offsetPaths(paths,amount){const o=new ClipperLib.ClipperOffset(2,.25*SCALE);o.AddPaths(paths,ClipperLib.JoinType.jtRound,ClipperLib.EndType.etClosedPolygon);const out=new ClipperLib.Paths();o.Execute(out,amount*SCALE);return out;}
 function circlePath(cx,cy,r,steps=72){const p=[];for(let i=0;i<steps;i++){const a=2*Math.PI*i/steps;p.push({X:Math.round((cx+Math.cos(a)*r)*SCALE),Y:Math.round((cy+Math.sin(a)*r)*SCALE)});}return p;}
-function makeBasePaths(letterPaths,position){const expanded=offsetPaths(clipperUnion(letterPaths),BASE_OFFSET),b=boundsOf(expanded);let x,y;if(position==='top-left'){x=b.minX/SCALE+3.5;y=b.maxY/SCALE-2.5;}else{x=b.minX/SCALE+2.5;y=(b.minY+b.maxY)/(2*SCALE);}const joined=clipperUnion([...expanded,circlePath(x,y,7.5)]);const diff=new ClipperLib.Clipper();diff.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);diff.AddPath(circlePath(x,y,3.1),ClipperLib.PolyType.ptClip,true);const result=new ClipperLib.Paths();diff.Execute(ClipperLib.ClipType.ctDifference,result,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);return result;}
+function makeBasePaths(letterPaths,position){
+ const expanded=offsetPaths(clipperUnion(letterPaths),BASE_OFFSET),b=boundsOf(expanded);
+ let x,y;
+ if(position==='top-left'){x=b.minX/SCALE+5.5;y=b.maxY/SCALE-5.5;}
+ else{x=b.minX/SCALE+5.5;y=(b.minY+b.maxY)/(2*SCALE);}
+ const outerRing=circlePath(x,y,7.5);
+ /* Find the closest point on the expanded name outline and add a rounded
+    connector from the ring to that outline, so the ring cannot float. */
+ let best=null,bestD=Infinity;
+ expanded.forEach(poly=>{for(let i=0;i<poly.length;i++){
+  const a=poly[i],c=poly[(i+1)%poly.length];
+  const ax=a.X/SCALE,ay=a.Y/SCALE,bx=c.X/SCALE,by=c.Y/SCALE;
+  const dx=bx-ax,dy=by-ay,den=dx*dx+dy*dy;
+  const t=den?Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/den)):0;
+  const px=ax+t*dx,py=ay+t*dy,d=(px-x)*(px-x)+(py-y)*(py-y);
+  if(d<bestD){bestD=d;best={X:Math.round(px*SCALE),Y:Math.round(py*SCALE)};}
+ }});
+ const connector=new ClipperLib.ClipperOffset(2,.25*SCALE);
+ connector.AddPath([{X:Math.round(x*SCALE),Y:Math.round(y*SCALE)},best],ClipperLib.JoinType.jtRound,ClipperLib.EndType.etOpenRound);
+ const bridge=new ClipperLib.Paths();connector.Execute(bridge,2.8*SCALE);
+ const joined=clipperUnion([...expanded,outerRing,...bridge]);
+ const diff=new ClipperLib.Clipper();diff.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);
+ diff.AddPath(circlePath(x,y,3.1),ClipperLib.PolyType.ptClip,true);
+ const result=new ClipperLib.Paths();
+ diff.Execute(ClipperLib.ClipType.ctDifference,result,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
+ return result;
+}
 function pointInside(pt,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if(((a.Y>pt.Y)!==(b.Y>pt.Y))&&(pt.X<(b.X-a.X)*(pt.Y-a.Y)/(b.Y-a.Y)+a.X))inside=!inside;}return inside;}
 function pathToShape(path){const s=new THREE.Shape();path.forEach((p,i)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(i===0)s.moveTo(x,y);else s.lineTo(x,y);});s.closePath();return s;}
 function pathsToShapes(paths){const outers=[],holes=[];paths.forEach(p=>{if(ClipperLib.Clipper.Orientation(p))outers.push(p);else holes.push(p);});const shapes=outers.map(pathToShape);holes.forEach(h=>{for(let i=0;i<outers.length;i++){if(pointInside(h[0],outers[i])){const hp=new THREE.Path();h.forEach((p,j)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(j===0)hp.moveTo(x,y);else hp.lineTo(x,y);});hp.closePath();shapes[i].holes.push(hp);break;}}});return shapes;}
 function makeBaseMesh(paths){const geometry=new THREE.ExtrudeGeometry(pathsToShapes(paths),{depth:BASE_THICKNESS,bevelEnabled:false,curveSegments:16,steps:1});geometry.computeVertexNormals();const material=new THREE.MeshStandardMaterial({color:baseColor.hex,roughness:.58,metalness:.01});const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=true;mesh.receiveShadow=true;return mesh;}
-function removeOldModel(){[baseMesh,nameMesh].forEach(m=>{if(m){scene.remove(m);m.geometry.dispose();m.material.dispose();}});baseMesh=null;nameMesh=null;}
+function removeOldModel(){[baseMesh,nameMesh].forEach(m=>{if(m){scene.remove(m);m.geometry.dispose();if(Array.isArray(m.material)){[...new Set(m.material)].forEach(mat=>mat.dispose());}else if(m.material)m.material.dispose();}});baseMesh=null;nameMesh=null;}
 function rebuildKeychain(){if(!font||!scene)return;const raw=nameInput.value.trim();if(!raw){removeOldModel();loading.textContent='Type a name to see your keychain.';loading.style.display='block';updatePrice();return;}
- try{removeOldModel();let contours=scalePaths(getContours(raw),76);const basePaths=makeBasePaths(contours,attachment.value);baseMesh=makeBaseMesh(basePaths);const ng=getNameShapes(raw);const nm=new THREE.MeshStandardMaterial({color:nameColor.hex,roughness:.48,metalness:.01,side:THREE.DoubleSide});nameMesh=new THREE.Mesh(ng,nm);nameMesh.position.z=BASE_THICKNESS+.08;nameMesh.castShadow=true;nameMesh.receiveShadow=true;scene.add(baseMesh);scene.add(nameMesh);
+ try{removeOldModel();let contours=scalePaths(getContours(raw),76);const basePaths=makeBasePaths(contours,attachment.value);baseMesh=makeBaseMesh(basePaths);const ng=getNameGeometry(contours);const nm=new THREE.MeshStandardMaterial({color:nameColor.hex,roughness:.48,metalness:.01,side:THREE.DoubleSide});nameMesh=new THREE.Mesh(ng,[nm,nm]);nameMesh.position.z=BASE_THICKNESS+.08;nameMesh.castShadow=true;nameMesh.receiveShadow=true;scene.add(baseMesh);scene.add(nameMesh);
   const bb=new THREE.Box3().setFromObject(baseMesh),center=bb.getCenter(new THREE.Vector3());baseMesh.position.x-=center.x;baseMesh.position.y-=center.y;nameMesh.position.x-=center.x;nameMesh.position.y-=center.y;
   const full=new THREE.Box3().setFromObject(baseMesh);full.expandByObject(nameMesh);const size=full.getSize(new THREE.Vector3()),mid=full.getCenter(new THREE.Vector3()),max=Math.max(size.x,size.y,size.z);camera.position.set(mid.x,mid.y-max*1.65,mid.z+max*1.5);controls.target.copy(mid);controls.update();loading.textContent='';loading.style.display='none';
  }catch(e){console.error('Keychain generation error:',e);loading.textContent='Could not generate this keychain: '+(e&&e.message?e.message:'Please try again.');loading.style.display='block';}
  updatePrice();}
-function updateMaterials(){if(baseMesh)baseMesh.material.color.set(baseColor.hex);if(nameMesh)nameMesh.material.color.set(nameColor.hex);}
+function updateMaterials(){if(baseMesh)baseMesh.material.color.set(baseColor.hex);if(nameMesh){const mats=Array.isArray(nameMesh.material)?nameMesh.material:[nameMesh.material];mats.forEach(mat=>mat.color.set(nameColor.hex));}}
 function updatePrice(){const n=nameInput.value.trim().replace(/\s/g,'').length;const p=n>=9?550:n>=6?450:350;document.getElementById('price').textContent='Rs. '+p;}
 function scheduleRebuild(){clearTimeout(rebuildTimer);rebuildTimer=setTimeout(rebuildKeychain,180);}
 nameInput.addEventListener('input',()=>{updatePrice();scheduleRebuild();});attachment.addEventListener('change',scheduleRebuild);
 orderButton.addEventListener('click',()=>{const name=nameInput.value.trim(),letters=name.replace(/\s/g,'').length;if(!letters){alert('Please enter your name first.');return;}const price=letters>=9?550:letters>=6?450:350;const pos=attachment.value==='top-left'?'Top':'Side';const msg=`Hello She3DPrints! I would like to order a custom name keychain.\n\nName: ${name}\nBase colour: ${baseColor.name}\nName colour: ${nameColor.name}\nKeyring position: ${pos}\nPrice: Rs. ${price}\n\nThank you!`;const phoneNumber='947XXXXXXXX';window.open('https://wa.me/'+phoneNumber+'?text='+encodeURIComponent(msg),'_blank');});
 async function start(){try{
- if(!window.THREE)throw new Error('Three.js did not load.');if(!THREE.OrbitControls)throw new Error('OrbitControls did not load.');if(!THREE.SVGLoader)throw new Error('SVGLoader did not load.');if(!window.opentype)throw new Error('OpenType.js did not load.');if(!window.ClipperLib)throw new Error('Clipper library did not load.');
+ if(!window.THREE)throw new Error('Three.js did not load.');if(!THREE.OrbitControls)throw new Error('OrbitControls did not load.');if(!window.opentype)throw new Error('OpenType.js did not load.');if(!window.ClipperLib)throw new Error('Clipper library did not load.');
  initThree();
  font=await new Promise((resolve,reject)=>{const urls=['https://raw.githubusercontent.com/google/fonts/main/apache/satisfy/Satisfy-Regular.ttf','https://cdn.jsdelivr.net/gh/google/fonts@main/apache/satisfy/Satisfy-Regular.ttf'];let i=0;function attempt(){if(i>=urls.length){reject(new Error('The Satisfy font could not be downloaded.'));return;}opentype.load(urls[i++],(err,f)=>{if(err||!f)attempt();else resolve(f);});}attempt();});
  orderButton.disabled=false;rebuildKeychain();
