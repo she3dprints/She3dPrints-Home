@@ -117,7 +117,7 @@ orderButton.addEventListener('click',()=>{const name=nameInput.value.trim(),lett
 async function start(){try{
  if(!window.THREE)throw new Error('Three.js did not load.');if(!THREE.OrbitControls)throw new Error('OrbitControls did not load.');if(!THREE.SVGLoader)throw new Error('SVGLoader did not load.');if(!window.opentype)throw new Error('OpenType.js did not load.');if(!window.ClipperLib)throw new Error('Clipper library did not load.');
  initThree();
- font=await new Promise((resolve,reject)=>{const urls=['https://raw.githubusercontent.com/google/fonts/main/ofl/satisfy/Satisfy-Regular.ttf','https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/satisfy/Satisfy-Regular.ttf'];let i=0;function attempt(){if(i>=urls.length){reject(new Error('The Satisfy font could not be downloaded.'));return;}opentype.load(urls[i++],(err,f)=>{if(err||!f)attempt();else resolve(f);});}attempt();});
+ font=await new Promise((resolve,reject)=>{const urls=['https://raw.githubusercontent.com/google/fonts/main/apache/satisfy/Satisfy-Regular.ttf','https://cdn.jsdelivr.net/gh/google/fonts@main/apache/satisfy/Satisfy-Regular.ttf'];let i=0;function attempt(){if(i>=urls.length){reject(new Error('The Satisfy font could not be downloaded.'));return;}opentype.load(urls[i++],(err,f)=>{if(err||!f)attempt();else resolve(f);});}attempt();});
  orderButton.disabled=false;rebuildKeychain();
  }catch(e){console.error('Preview startup error:',e);loading.textContent='3D preview could not load: '+(e&&e.message?e.message:'Please reload the page.');loading.style.display='block';}}
 start();
