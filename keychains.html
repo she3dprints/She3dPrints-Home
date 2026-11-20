@@ -106,8 +106,10 @@ function makeBasePaths(letterPaths,position){
   /* TOP option: place the keyring loop above the upper-left stroke of
      the first capital letter (the position marked in the customer's image).
      The bridge below is unioned with the name base, so the loop is attached. */
-  x=b.minX/SCALE+14;
-  y=b.maxY/SCALE+8.5;
+  /* Move the top loop to the position marked above the capital A:
+     slightly to the right and higher than the previous version. */
+  x=b.minX/SCALE+18;
+  y=b.maxY/SCALE+14.5;
  } else {
   /* SIDE option stays attached to the left edge. */
   x=b.minX/SCALE+5.5;
