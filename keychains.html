@@ -9,7 +9,7 @@
 *{box-sizing:border-box}body{margin:0;background:var(--milk);color:var(--dark);font-family:Arial,sans-serif}
 header{padding:22px 16px;text-align:center;border-bottom:1px solid var(--oat)}header h1{margin:0;font-size:25px;color:var(--brown)}header p{margin:7px 0 0;font-size:15px}
 .container{max-width:1050px;margin:auto;padding:20px 15px 40px}.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:25px}
-.preview-box,.panel{background:#fff;border:1px solid var(--oat);border-radius:16px}.preview-box{overflow:hidden;position:relative}#preview{width:100%;height:420px;display:block;touch-action:none}.preview-note{text-align:center;font-size:12px;color:#82756D;padding:0 10px 15px}.panel{padding:22px}h2{font-size:20px;margin:0 0 20px;color:var(--brown)}.field{margin-bottom:20px}label{display:block;font-size:14px;font-weight:bold;margin-bottom:9px}
+.preview-box,.panel{background:#fff;border:1px solid var(--oat);border-radius:16px}.preview-box{overflow:hidden;position:relative}#preview{width:100%;height:420px;display:block;touch-action:none}.preview-note{text-align:center;font-size:12px;color:#82756D;padding:0 10px 12px}.approval-note{margin:4px 14px 16px;padding:13px 15px;background:#FBF7F4;border:1px solid #E8DED5;border-radius:12px;color:#684332;font-size:12px;line-height:1.6;text-align:center}.approval-note strong{display:block;font-size:13px;margin-bottom:4px;color:#684332}.approval-note .heart{color:#B98F88}.panel{padding:22px}h2{font-size:20px;margin:0 0 20px;color:var(--brown)}.field{margin-bottom:20px}label{display:block;font-size:14px;font-weight:bold;margin-bottom:9px}
 input[type=text],select{width:100%;padding:13px;border:1px solid #D9CBC1;border-radius:9px;font-size:16px;background:#fff;color:var(--dark)}.colors{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.swatch{width:38px;height:38px;border-radius:50%;border:2px solid #ddd;cursor:pointer;padding:0;flex:0 0 auto}.swatch.selected{outline:2px solid var(--brown);outline-offset:3px}.swatch.white{border:1px solid #aaa}.selected-name{font-size:13px;color:#684332;margin-top:10px;min-height:17px}.price{background:var(--milk);padding:15px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin:18px 0}.price strong{font-size:22px;color:var(--brown)}.order-button{border:0;border-radius:10px;padding:15px;width:100%;background:var(--brown);color:#fff;font-size:15px;font-weight:bold;cursor:pointer}.order-button:disabled{opacity:.5}.small{font-size:12px;color:#82756D;line-height:1.5}.loading{text-align:center;padding:12px 14px 18px;font-size:13px;color:var(--brown);min-height:20px;overflow-wrap:anywhere}
 @media(max-width:760px){.layout{grid-template-columns:1fr}#preview{height:340px}.panel{padding:18px}}
 </style>
@@ -17,7 +17,7 @@ input[type=text],select{width:100%;padding:13px;border:1px solid #D9CBC1;border-
 <body>
 <header><h1>She3DPrints</h1><p>Custom Name Keychains</p></header>
 <div class="container"><div class="layout">
-  <div class="preview-box"><div id="preview"></div><div class="preview-note">Drag to rotate · Pinch to zoom</div><div class="loading" id="loading">Preparing 3D preview...</div></div>
+  <div class="preview-box"><div id="preview"></div><div class="preview-note">Drag to rotate · Pinch to zoom</div><div class="loading" id="loading">Preparing 3D preview...</div><div class="approval-note"><strong>♡ A little note before we make yours ♡</strong>This preview is for illustrative purposes only. Once your order is confirmed, we’ll design your custom keychain and share the finished design with you for approval before printing.</div></div>
   <div class="panel"><h2>Customise Your Keychain</h2>
     <div class="field"><label for="customerName">Your Name</label><input type="text" id="customerName" maxlength="18" value="Asma" placeholder="Type your name" autocomplete="off"></div>
     <div class="field"><label>Base Colour</label><div class="colors" id="baseColors"></div><div class="selected-name" id="baseSelected">Selected: Dark Green</div></div>
@@ -38,12 +38,12 @@ input[type=text],select{width:100%;padding:13px;border:1px solid #D9CBC1;border-
 <script>
 'use strict';
 const COLORS=[
- {name:'Light Pink',hex:'#F28EAE'},
- {name:'Dark Green',hex:'#174C38'},
- {name:'Matcha Green',hex:'#B6C98B'},
- {name:'Black',hex:'#222222'},
- {name:'White',hex:'#FFFFFF'},
- {name:'Brown',hex:'#795039'}
+ {name:'Peach Pink',hex:'#E8A0A5'},
+ {name:'Olive Green',hex:'#777B45'},
+ {name:'Milky White',hex:'#F3EFE6'},
+ {name:'Deep Black',hex:'#202020'},
+ {name:'Light Brown',hex:'#A87954'},
+ {name:'Matcha Green',hex:'#A8B98A'}
 ];
 let baseColor=COLORS[1],nameColor=COLORS[0],font=null,scene=null,camera=null,renderer=null,controls=null,baseMesh=null,nameMesh=null,rebuildTimer=null;
 const preview=document.getElementById('preview'),loading=document.getElementById('loading'),nameInput=document.getElementById('customerName'),attachment=document.getElementById('attachment'),orderButton=document.getElementById('orderButton');
@@ -141,7 +141,7 @@ orderButton.addEventListener('click',()=>{const name=nameInput.value.trim(),lett
 async function start(){try{
  if(!window.THREE)throw new Error('Three.js did not load.');if(!THREE.OrbitControls)throw new Error('OrbitControls did not load.');if(!window.opentype)throw new Error('OpenType.js did not load.');if(!window.ClipperLib)throw new Error('Clipper library did not load.');
  initThree();
- font=await new Promise((resolve,reject)=>{const urls=['https://raw.githubusercontent.com/google/fonts/main/apache/satisfy/Satisfy-Regular.ttf','https://cdn.jsdelivr.net/gh/google/fonts@main/apache/satisfy/Satisfy-Regular.ttf'];let i=0;function attempt(){if(i>=urls.length){reject(new Error('The Satisfy font could not be downloaded.'));return;}opentype.load(urls[i++],(err,f)=>{if(err||!f)attempt();else resolve(f);});}attempt();});
+ font=await new Promise((resolve,reject)=>{const urls=['./Satisfy-Regular.ttf','https://raw.githubusercontent.com/google/fonts/main/ofl/satisfy/Satisfy-Regular.ttf','https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/satisfy/Satisfy-Regular.ttf'];let i=0;function attempt(){if(i>=urls.length){reject(new Error('The Satisfy font could not be downloaded.'));return;}opentype.load(urls[i++],(err,f)=>{if(err||!f)attempt();else resolve(f);});}attempt();});
  orderButton.disabled=false;rebuildKeychain();
  }catch(e){console.error('Preview startup error:',e);loading.textContent='3D preview could not load: '+(e&&e.message?e.message:'Please reload the page.');loading.style.display='block';}}
 start();
