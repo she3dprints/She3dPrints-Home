@@ -12,7 +12,6 @@
   --oat:#E8DED5;
   --brown:#684332;
   --dark:#30251F;
-  --pink:#E7A1B5;
 }
 * { box-sizing:border-box; }
 
@@ -103,6 +102,7 @@ input[type="text"], select {
   border:2px solid #ddd;
   cursor:pointer;
   position:relative;
+  padding:0;
 }
 .swatch.selected {
   outline:2px solid var(--brown);
@@ -124,7 +124,7 @@ input[type="text"], select {
   font-size:22px;
   color:var(--brown);
 }
-button {
+.order-button {
   border:0;
   border-radius:10px;
   padding:15px;
@@ -135,7 +135,7 @@ button {
   font-weight:bold;
   cursor:pointer;
 }
-button:disabled {
+.order-button:disabled {
   opacity:.5;
   cursor:not-allowed;
 }
@@ -220,7 +220,7 @@ button:disabled {
         9 or more letters: Rs.550
       </p>
 
-      <button id="orderButton" disabled>
+      <button class="order-button" id="orderButton" disabled>
         Order via WhatsApp
       </button>
 
@@ -234,7 +234,7 @@ button:disabled {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/clipper-lib@6.4.2/clipper.js"></script>
 
 <script>
@@ -254,7 +254,6 @@ let font = null;
 let scene, camera, renderer, controls;
 let baseMesh = null;
 let nameMesh = null;
-let keyringMesh = null;
 
 const preview = document.getElementById("preview");
 const loading = document.getElementById("loading");
@@ -344,14 +343,6 @@ function initThree() {
   secondLight.position.set(45, -35, 40);
   scene.add(secondLight);
 
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(300, 300),
-    new THREE.ShadowMaterial({opacity:0.12})
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.z = -10;
-  scene.add(floor);
-
   animate();
 }
 
@@ -374,11 +365,8 @@ function resizePreview() {
 
 window.addEventListener("resize", resizePreview);
 
-/* Convert font curves into polygon outlines */
-
 function getContours(text) {
-  const fontSize = 100;
-  const path = font.getPath(text, 0, 0, fontSize);
+  const path = font.getPath(text, 0, 0, 100);
   const commands = path.commands;
   const contours = [];
 
@@ -387,13 +375,14 @@ function getContours(text) {
   let start = {x:0,y:0};
 
   function addPoint(x,y) {
-    points.push({X:Math.round(x*SCALE),Y:Math.round(-y*SCALE)});
+    points.push({
+      X:Math.round(x*SCALE),
+      Y:Math.round(-y*SCALE)
+    });
   }
 
   function finishContour() {
-    if (points.length >= 3) {
-      contours.push(points);
-    }
+    if (points.length >= 3) contours.push(points);
     points = [];
   }
 
@@ -426,12 +415,10 @@ function getContours(text) {
       start = {...current};
       addPoint(current.x,current.y);
     }
-
     else if (cmd.type === "L") {
       current = {x:cmd.x,y:cmd.y};
       addPoint(current.x,current.y);
     }
-
     else if (cmd.type === "Q") {
       const p0 = {...current};
       const p1 = {x:cmd.x1,y:cmd.y1};
@@ -443,7 +430,6 @@ function getContours(text) {
       }
       current = p2;
     }
-
     else if (cmd.type === "C") {
       const p0 = {...current};
       const p1 = {x:cmd.x1,y:cmd.y1};
@@ -456,7 +442,6 @@ function getContours(text) {
       }
       current = p3;
     }
-
     else if (cmd.type === "Z") {
       addPoint(start.x,start.y);
       finishContour();
@@ -465,7 +450,6 @@ function getContours(text) {
   });
 
   finishContour();
-
   return contours;
 }
 
@@ -529,7 +513,6 @@ function offsetPaths(paths, amount) {
   );
 
   const result = new ClipperLib.Paths();
-
   offset.Execute(result, amount*SCALE);
 
   return result;
@@ -550,7 +533,7 @@ function circlePath(cx,cy,radius,steps=48) {
 }
 
 function makeBasePaths(letterPaths, position) {
-  let expanded = offsetPaths(
+  const expanded = offsetPaths(
     clipperUnion(letterPaths),
     BASE_OFFSET
   );
@@ -568,18 +551,17 @@ function makeBasePaths(letterPaths, position) {
   }
 
   const tab = circlePath(tabX,tabY,7.5);
-
   const combined = clipperUnion([...expanded,tab]);
-
-  /* A round keyring hole through the attachment */
   const hole = circlePath(tabX,tabY,3.1);
 
   const difference = new ClipperLib.Clipper();
+
   difference.AddPaths(
     combined,
     ClipperLib.PolyType.ptSubject,
     true
   );
+
   difference.AddPath(
     hole,
     ClipperLib.PolyType.ptClip,
@@ -683,7 +665,6 @@ function makeExtrudedMesh(paths, depth, material, zPosition) {
 
   const mesh = new THREE.Mesh(geometry,material);
   mesh.position.z = zPosition;
-
   mesh.castShadow = true;
   mesh.receiveShadow = true;
 
@@ -695,6 +676,7 @@ function removeOldModel() {
     if (mesh) {
       scene.remove(mesh);
       mesh.geometry.dispose();
+      mesh.material.dispose();
     }
   });
 
@@ -839,7 +821,7 @@ Price: Rs. ${price}
 
 Thank you!`;
 
-  const phoneNumber = "94777224525";
+  const phoneNumber = "947XXXXXXXX";
 
   window.open(
     "https://wa.me/" + phoneNumber +
@@ -849,12 +831,12 @@ Thank you!`;
 });
 
 async function start() {
-  initThree();
-
   try {
+    initThree();
+
     font = await new Promise((resolve,reject) => {
       opentype.load(
-        "https://raw.githubusercontent.com/google/fonts/main/ofl/satisfy/Satisfy-Regular.ttf",
+        "https://cdn.jsdelivr.net/gh/google/fonts@main/apache/satisfy/Satisfy-Regular.ttf",
         (error,loadedFont) => {
           if (error) reject(error);
           else resolve(loadedFont);
@@ -866,9 +848,10 @@ async function start() {
     rebuildKeychain();
 
   } catch(error) {
-    console.error(error);
+    console.error("3D preview error:",error);
     loading.textContent =
-      "The 3D font could not load. Please refresh the page.";
+      "The 3D preview could not load. Please try again later.";
+    loading.style.display="block";
   }
 }
 
