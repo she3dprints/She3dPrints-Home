@@ -111,173 +111,186 @@ function getScaledContours(text){
  return {paths,scale,minX,minY,maxX,maxY};
 }
 
+function offsetSilhouette(text, offsetMm, holePosition) {
+ const data = getScaledContours(text);
 
-function offsetSilhouette(text,offsetMm,holePosition){
- const data=getScaledContours(text);
- const co=new ClipperLib.ClipperOffset(3,250);
- const closed=data.paths.map(path=>path.map(p=>new ClipperLib.IntPoint(p.X,p.Y)));
+ const co = new ClipperLib.ClipperOffset(3, 250);
+ const closed = data.paths.map(path =>
+  path.map(p => new ClipperLib.IntPoint(p.X, p.Y))
+ );
 
- co.AddPaths(closed,ClipperLib.JoinType.jtRound,ClipperLib.EndType.etClosedPolygon);
+ co.AddPaths(
+  closed,
+  ClipperLib.JoinType.jtRound,
+  ClipperLib.EndType.etClosedPolygon
+ );
 
- const expanded=new ClipperLib.Paths();
- co.Execute(expanded,offsetMm*1000);
+ const expanded = new ClipperLib.Paths();
+ co.Execute(expanded, offsetMm * 1000);
 
- const union=new ClipperLib.Clipper();
- union.AddPaths(expanded,ClipperLib.PolyType.ptSubject,true);
+ const union = new ClipperLib.Clipper();
+ union.AddPaths(expanded, ClipperLib.PolyType.ptSubject, true);
 
- const merged=new ClipperLib.Paths();
- union.Execute(ClipperLib.ClipType.ctUnion,merged,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
+ const merged = new ClipperLib.Paths();
+ union.Execute(
+  ClipperLib.ClipType.ctUnion,
+  merged,
+  ClipperLib.PolyFillType.pftNonZero,
+  ClipperLib.PolyFillType.pftNonZero
+ );
 
- let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+ let minX = Infinity, minY = Infinity;
+ let maxX = -Infinity, maxY = -Infinity;
 
- merged.forEach(poly=>poly.forEach(p=>{
-  minX=Math.min(minX,p.X);
-  minY=Math.min(minY,p.Y);
-  maxX=Math.max(maxX,p.X);
-  maxY=Math.max(maxY,p.Y);
+ merged.forEach(poly => poly.forEach(p => {
+  minX = Math.min(minX, p.X);
+  minY = Math.min(minY, p.Y);
+  maxX = Math.max(maxX, p.X);
+  maxY = Math.max(maxY, p.Y);
  }));
 
- // Find the actual outline point for this particular name.
- const topLeft=holePosition==='top-left';
- const targetX=topLeft ? minX+(maxX-minX)*0.10 : minX;
- const targetY=topLeft ? maxY : (minY+maxY)/2;
+ // Select the attachment position on the actual name outline.
+ const topPosition = holePosition === 'top-left';
 
- const candidates=merged.filter(p=>ClipperLib.Clipper.Area(p)>0);
- const boundaryPoints=candidates.length?candidates.flat():merged.flat();
+ const targetX = topPosition
+  ? minX + (maxX - minX) * 0.10
+  : minX;
 
- let anchor=boundaryPoints[0];
- let best=Infinity;
+ const targetY = topPosition
+  ? maxY
+  : (minY + maxY) / 2;
 
- boundaryPoints.forEach(p=>{
-  const d=(p.X-targetX)**2+(p.Y-targetY)**2;
-  if(d<best){
-   best=d;
-   anchor=p;
+ const boundaryPoints = merged
+  .filter(p => ClipperLib.Clipper.Area(p) > 0)
+  .flat();
+
+ let anchor = boundaryPoints[0];
+ let best = Infinity;
+
+ boundaryPoints.forEach(p => {
+  const distance =
+   (p.X - targetX) ** 2 +
+   (p.Y - targetY) ** 2;
+
+  if (distance < best) {
+   best = distance;
+   anchor = p;
   }
  });
 
- // Vertical top-left attachment; horizontal left-side attachment.
- const ux=topLeft?0:-1;
- const uy=topLeft?1:0;
+ // Direction pointing outwards from the keychain.
+ const ux = topPosition ? 0 : -1;
+ const uy = topPosition ? 1 : 0;
 
- const tabR=4800;
- const holeR=2100;
- const bridgeHalf=3200;
+ // Open semicircular notch cut directly into the base.
+ const notchRadius = 3000;
+ const notchDepth = notchRadius * 0.55;
 
- // Position the tab relative to the actual name outline.
- const cx=Math.round(anchor.X+ux*3000);
- const cy=Math.round(anchor.Y+uy*3000);
+ const cx = Math.round(anchor.X + ux * notchDepth);
+ const cy = Math.round(anchor.Y + uy * notchDepth);
 
- const tab=[];
- for(let i=0;i<64;i++){
-  const a=2*Math.PI*i/64;
-  tab.push(new ClipperLib.IntPoint(
-   Math.round(cx+tabR*Math.cos(a)),
-   Math.round(cy+tabR*Math.sin(a))
-  ));
- }
+ const notch = [];
 
- // Create a connecting bridge that overlaps the name base.
- const sx=anchor.X-ux*1200;
- const sy=anchor.Y-uy*1200;
- const ex=cx;
- const ey=cy;
- const px=-uy;
- const py=ux;
+ for (let i = 0; i < 96; i++) {
+  const angle = 2 * Math.PI * i / 96;
 
- const bridge=[
-  new ClipperLib.IntPoint(
-   Math.round(sx+px*bridgeHalf),
-   Math.round(sy+py*bridgeHalf)
-  ),
-  new ClipperLib.IntPoint(
-   Math.round(ex+px*bridgeHalf),
-   Math.round(ey+py*bridgeHalf)
-  ),
-  new ClipperLib.IntPoint(
-   Math.round(ex-px*bridgeHalf),
-   Math.round(ey-py*bridgeHalf)
-  ),
-  new ClipperLib.IntPoint(
-   Math.round(sx-px*bridgeHalf),
-   Math.round(sy-py*bridgeHalf)
-  )
- ];
-
- // Join the name, bridge and ring into one continuous base.
- const joinedClipper=new ClipperLib.Clipper();
- joinedClipper.AddPaths([...merged,tab,bridge],ClipperLib.PolyType.ptSubject,true);
-
- const joined=new ClipperLib.Paths();
- joinedClipper.Execute(ClipperLib.ClipType.ctUnion,joined,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
-
- // Make an open semicircular keyring notch.
- // Its centre sits on the outside edge of the attachment.
- const holeX=Math.round(cx+ux*tabR);
- const holeY=Math.round(cy+uy*tabR);
-
- const notch=[];
- for(let i=0;i<64;i++){
-  const a=2*Math.PI*i/64;
   notch.push(new ClipperLib.IntPoint(
-   Math.round(holeX+holeR*Math.cos(a)),
-   Math.round(holeY+holeR*Math.sin(a))
+   Math.round(cx + notchRadius * Math.cos(angle)),
+   Math.round(cy + notchRadius * Math.sin(angle))
   ));
  }
 
- const cutClipper=new ClipperLib.Clipper();
- cutClipper.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);
- cutClipper.AddPath(notch,ClipperLib.PolyType.ptClip,true);
+ // Cut the notch from the original silhouette.
+ const cutter = new ClipperLib.Clipper();
 
- const solution=new ClipperLib.Paths();
- cutClipper.Execute(ClipperLib.ClipType.ctDifference,solution,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
+ cutter.AddPaths(
+  merged,
+  ClipperLib.PolyType.ptSubject,
+  true
+ );
 
- const outers=solution.filter(p=>ClipperLib.Clipper.Area(p)>0);
- const holes=solution.filter(p=>ClipperLib.Clipper.Area(p)<0);
+ cutter.AddPath(
+  notch,
+  ClipperLib.PolyType.ptClip,
+  true
+ );
 
- const shapes=outers.map(poly=>{
-  const sh=new THREE.Shape();
-  poly.forEach((pt,i)=>{
-   const x=pt.X/1000;
-   const y=pt.Y/1000;
-   i?sh.lineTo(x,y):sh.moveTo(x,y);
+ const solution = new ClipperLib.Paths();
+
+ cutter.Execute(
+  ClipperLib.ClipType.ctDifference,
+  solution,
+  ClipperLib.PolyFillType.pftNonZero,
+  ClipperLib.PolyFillType.pftNonZero
+ );
+
+ const outers = solution.filter(
+  p => ClipperLib.Clipper.Area(p) > 0
+ );
+
+ const holes = solution.filter(
+  p => ClipperLib.Clipper.Area(p) < 0
+ );
+
+ const shapes = outers.map(poly => {
+  const shape = new THREE.Shape();
+
+  poly.forEach((pt, i) => {
+   const x = pt.X / 1000;
+   const y = pt.Y / 1000;
+
+   if (i === 0) shape.moveTo(x, y);
+   else shape.lineTo(x, y);
   });
-  sh.closePath();
-  return sh;
+
+  shape.closePath();
+  return shape;
  });
 
- holes.forEach(poly=>{
-  const p0=poly[0];
-  let owner=null;
+ holes.forEach(poly => {
+  const point = poly[0];
+  let owner = null;
 
-  for(const sh of shapes){
-   const pts=sh.getPoints(12).map(v=>({
-    X:v.x*1000,
-    Y:v.y*1000
+  for (const shape of shapes) {
+   const points = shape.getPoints(12).map(v => ({
+    X: v.x * 1000,
+    Y: v.y * 1000
    }));
 
-   if(ClipperLib.Clipper.PointInPolygon(
-    new ClipperLib.IntPoint(p0.X,p0.Y),pts
-   )!==0){
-    owner=sh;
+   if (
+    ClipperLib.Clipper.PointInPolygon(
+     new ClipperLib.IntPoint(point.X, point.Y),
+     points
+    ) !== 0
+   ) {
+    owner = shape;
     break;
    }
   }
 
-  if(owner){
-   const h=new THREE.Path();
-   poly.forEach((pt,i)=>{
-    const x=pt.X/1000;
-    const y=pt.Y/1000;
-    i?h.lineTo(x,y):h.moveTo(x,y);
+  if (owner) {
+   const hole = new THREE.Path();
+
+   poly.forEach((pt, i) => {
+    const x = pt.X / 1000;
+    const y = pt.Y / 1000;
+
+    if (i === 0) hole.moveTo(x, y);
+    else hole.lineTo(x, y);
    });
-   h.closePath();
-   owner.holes.push(h);
+
+   hole.closePath();
+   owner.holes.push(hole);
   }
  });
 
  return shapes;
 }
+
+    
+ 
+
+
 
 
 function makeTextGeometry(text,depth){
