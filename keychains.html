@@ -27,13 +27,11 @@ header {
   text-align:center;
   border-bottom:1px solid var(--oat);
 }
-
 header h1 {
   margin:0;
   font-size:25px;
   color:var(--brown);
 }
-
 header p {
   margin:7px 0 0;
   font-size:13px;
@@ -44,59 +42,42 @@ header p {
   margin:auto;
   padding:20px 15px 40px;
 }
-
 .layout {
   display:grid;
   grid-template-columns:1.15fr .85fr;
   gap:25px;
 }
-
-.preview-box,
-.panel {
+.preview-box,.panel {
   background:white;
   border:1px solid var(--oat);
   border-radius:16px;
 }
-
-.preview-box {
-  overflow:hidden;
-}
-
+.preview-box {overflow:hidden}
 #preview {
   width:100%;
   height:420px;
   display:block;
   touch-action:none;
 }
-
 .preview-note {
   text-align:center;
   font-size:12px;
   color:#82756D;
   padding:0 10px 15px;
 }
-
-.panel {
-  padding:22px;
-}
-
+.panel {padding:22px}
 h2 {
   font-size:20px;
   margin:0 0 20px;
   color:var(--brown);
 }
-
-.field {
-  margin-bottom:20px;
-}
-
+.field {margin-bottom:20px}
 label {
   display:block;
   font-size:14px;
   font-weight:bold;
   margin-bottom:9px;
 }
-
 input[type="text"],select {
   width:100%;
   padding:13px;
@@ -106,13 +87,11 @@ input[type="text"],select {
   background:white;
   color:var(--dark);
 }
-
 .colors {
   display:flex;
   flex-wrap:wrap;
   gap:12px;
 }
-
 .swatch {
   width:34px;
   height:34px;
@@ -121,16 +100,11 @@ input[type="text"],select {
   cursor:pointer;
   padding:0;
 }
-
 .swatch.selected {
   outline:2px solid var(--brown);
   outline-offset:3px;
 }
-
-.swatch.white {
-  border:1px solid #aaa;
-}
-
+.swatch.white {border:1px solid #aaa}
 .price {
   background:var(--milk);
   padding:15px;
@@ -140,12 +114,10 @@ input[type="text"],select {
   align-items:center;
   margin:18px 0;
 }
-
 .price strong {
   font-size:22px;
   color:var(--brown);
 }
-
 .order-button {
   border:0;
   border-radius:10px;
@@ -157,34 +129,23 @@ input[type="text"],select {
   font-weight:bold;
   cursor:pointer;
 }
-
-.order-button:disabled {
-  opacity:.5;
-}
-
+.order-button:disabled {opacity:.5}
 .small {
   font-size:12px;
   color:#82756D;
   line-height:1.5;
 }
-
 .loading {
   text-align:center;
   padding:12px;
   font-size:13px;
   color:var(--brown);
+  overflow-wrap:anywhere;
 }
-
 @media(max-width:760px) {
-  .layout {
-    grid-template-columns:1fr;
-  }
-  #preview {
-    height:340px;
-  }
-  .panel {
-    padding:18px;
-  }
+  .layout {grid-template-columns:1fr}
+  #preview {height:340px}
+  .panel {padding:18px}
 }
 </style>
 </head>
@@ -201,12 +162,8 @@ input[type="text"],select {
 
     <div class="preview-box">
       <div id="preview"></div>
-      <div class="preview-note">
-        Drag to rotate · Pinch to zoom
-      </div>
-      <div class="loading" id="loading">
-        Preparing 3D preview...
-      </div>
+      <div class="preview-note">Drag to rotate · Pinch to zoom</div>
+      <div class="loading" id="loading">Preparing 3D preview...</div>
     </div>
 
     <div class="panel">
@@ -214,13 +171,9 @@ input[type="text"],select {
 
       <div class="field">
         <label for="customerName">Your Name</label>
-        <input
-          type="text"
-          id="customerName"
-          maxlength="18"
-          value="Asma"
-          placeholder="Type your name"
-          autocomplete="off">
+        <input type="text" id="customerName"
+          maxlength="18" value="Asma"
+          placeholder="Type your name" autocomplete="off">
       </div>
 
       <div class="field">
@@ -264,7 +217,6 @@ input[type="text"],select {
   </div>
 </div>
 
-<!-- 3D libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/SVGLoader.js"></script>
@@ -272,9 +224,9 @@ input[type="text"],select {
 <script src="https://cdn.jsdelivr.net/npm/clipper-lib@6.4.2/clipper.js"></script>
 
 <script>
-/* -------------------------
-   SETTINGS
-------------------------- */
+"use strict";
+
+/* SETTINGS */
 
 const COLORS = [
   {name:"Light Pink",hex:"#E7A1B5"},
@@ -285,124 +237,101 @@ const COLORS = [
   {name:"Brown",hex:"#684332"}
 ];
 
-let baseColor = COLORS[1];
-let nameColor = COLORS[0];
+let baseColor=COLORS[1];
+let nameColor=COLORS[0];
 
-let font = null;
-let scene, camera, renderer, controls;
-let baseMesh = null;
-let nameMesh = null;
+let font=null;
+let scene,camera,renderer,controls;
+let baseMesh=null;
+let nameMesh=null;
+let rebuildTimer=null;
 
-const preview = document.getElementById("preview");
-const loading = document.getElementById("loading");
-const nameInput = document.getElementById("customerName");
-const attachment = document.getElementById("attachment");
-const orderButton = document.getElementById("orderButton");
+const SCALE=1000;
+const BASE_THICKNESS=3.5;
+const NAME_HEIGHT=2.5;
+const BASE_OFFSET=3.5;
 
-const SCALE = 1000;
-const BASE_THICKNESS = 3.5;
-const NAME_HEIGHT = 2.5;
-const BASE_OFFSET = 3.5;
+const preview=document.getElementById("preview");
+const loading=document.getElementById("loading");
+const nameInput=document.getElementById("customerName");
+const attachment=document.getElementById("attachment");
+const orderButton=document.getElementById("orderButton");
 
-let rebuildTimer = null;
+/* COLOUR BUTTONS */
 
-/* -------------------------
-   COLOUR BUTTONS
-------------------------- */
+function makeSwatches(containerId,selected,callback) {
+  const container=document.getElementById(containerId);
 
-function makeSwatches(containerId, selected, callback) {
-  const container = document.getElementById(containerId);
+  COLORS.forEach(color=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="swatch"+
+      (color.hex==="#FFFFFF"?" white":"")+
+      (color===selected?" selected":"");
+    button.style.background=color.hex;
+    button.title=color.name;
+    button.setAttribute("aria-label",color.name);
 
-  COLORS.forEach(color => {
-    const swatch = document.createElement("button");
-    swatch.type = "button";
-
-    swatch.className =
-      "swatch" +
-      (color.hex === "#FFFFFF" ? " white" : "") +
-      (color === selected ? " selected" : "");
-
-    swatch.style.background = color.hex;
-    swatch.title = color.name;
-    swatch.setAttribute("aria-label",color.name);
-
-    swatch.addEventListener("click",() => {
-      container.querySelectorAll(".swatch").forEach(s =>
+    button.addEventListener("click",()=>{
+      container.querySelectorAll(".swatch").forEach(s=>
         s.classList.remove("selected")
       );
-
-      swatch.classList.add("selected");
+      button.classList.add("selected");
       callback(color);
     });
 
-    container.appendChild(swatch);
+    container.appendChild(button);
   });
 }
 
-makeSwatches("baseColors",baseColor,color => {
-  baseColor = color;
+makeSwatches("baseColors",baseColor,color=>{
+  baseColor=color;
   updateMaterials();
 });
 
-makeSwatches("nameColors",nameColor,color => {
-  nameColor = color;
+makeSwatches("nameColors",nameColor,color=>{
+  nameColor=color;
   updateMaterials();
 });
 
-/* -------------------------
-   THREE.JS INITIALISATION
-------------------------- */
+/* THREE.JS */
 
 function initThree() {
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color("#FFFFFF");
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color("#FFFFFF");
 
-  camera = new THREE.PerspectiveCamera(
-    38,
-    preview.clientWidth / preview.clientHeight,
-    0.1,
-    1000
+  camera=new THREE.PerspectiveCamera(
+    38,preview.clientWidth/preview.clientHeight,0.1,1000
   );
 
-  camera.position.set(0,-95,105);
+  camera.position.set(0,-100,100);
 
-  renderer = new THREE.WebGLRenderer({
+  renderer=new THREE.WebGLRenderer({
     antialias:true,
     alpha:false
   });
 
-  renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio,2)
-  );
-
-  renderer.setSize(
-    preview.clientWidth,
-    preview.clientHeight
-  );
-
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(preview.clientWidth,preview.clientHeight);
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
   preview.appendChild(renderer.domElement);
 
-  controls = new THREE.OrbitControls(
-    camera,
-    renderer.domElement
-  );
-
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.07;
-  controls.minDistance = 45;
-  controls.maxDistance = 180;
+  controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;
+  controls.dampingFactor=.07;
+  controls.minDistance=35;
+  controls.maxDistance=220;
 
   scene.add(new THREE.AmbientLight(0xffffff,.85));
 
-  const light = new THREE.DirectionalLight(0xffffff,1.2);
+  const light=new THREE.DirectionalLight(0xffffff,1.2);
   light.position.set(-35,45,90);
   scene.add(light);
 
-  const secondLight = new THREE.DirectionalLight(0xffffff,.45);
+  const secondLight=new THREE.DirectionalLight(0xffffff,.45);
   secondLight.position.set(45,-35,40);
   scene.add(secondLight);
 
@@ -411,109 +340,29 @@ function initThree() {
 
 function animate() {
   requestAnimationFrame(animate);
-
-  if (controls) controls.update();
-
-  if (renderer && scene && camera) {
-    renderer.render(scene,camera);
-  }
+  if(controls) controls.update();
+  if(renderer&&scene&&camera) renderer.render(scene,camera);
 }
 
 function resizePreview() {
-  if (!renderer) return;
-
-  const width = preview.clientWidth;
-  const height = preview.clientHeight;
-
-  camera.aspect = width/height;
+  if(!renderer) return;
+  const width=preview.clientWidth;
+  const height=preview.clientHeight;
+  camera.aspect=width/height;
   camera.updateProjectionMatrix();
-
   renderer.setSize(width,height);
 }
 
 window.addEventListener("resize",resizePreview);
 
-/* -------------------------
-   NAME OUTLINE
-------------------------- */
-
-function getNameShapes(text) {
-  const path = font.getPath(text,0,0,100);
-
-  const pathData = path.toPathData(3);
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg"
-         width="1000" height="400"
-         viewBox="-20 -250 1100 500">
-      <path d="${pathData}"
-            fill="black"
-            fill-rule="evenodd"/>
-    </svg>
-  `;
-
-  const parsed = THREE.SVGLoader.parse(svg);
-  const shapes = [];
-
-  parsed.paths.forEach(path => {
-    const newShapes = THREE.SVGLoader.createShapes(path);
-    shapes.push(...newShapes);
-  });
-
-  if (!shapes.length) {
-    throw new Error("The name outline could not be created.");
-  }
-
-  const geometry = new THREE.ExtrudeGeometry(shapes,{
-    depth:NAME_HEIGHT,
-    bevelEnabled:true,
-    bevelSegments:2,
-    steps:1,
-    bevelSize:.12,
-    bevelThickness:.12,
-    curveSegments:12
-  });
-
-  geometry.computeBoundingBox();
-
-  const bounds = geometry.boundingBox;
-
-  const width = bounds.max.x-bounds.min.x;
-
-  if (!width) throw new Error("Invalid name width.");
-
-  const scale = 76/width;
-
-  geometry.scale(scale,scale,1);
-
-  geometry.computeBoundingBox();
-
-  const centerX =
-    (geometry.boundingBox.min.x+geometry.boundingBox.max.x)/2;
-
-  const centerY =
-    (geometry.boundingBox.min.y+geometry.boundingBox.max.y)/2;
-
-  geometry.translate(-centerX,-centerY,0);
-
-  geometry.computeVertexNormals();
-
-  return geometry;
-}
-
-/* -------------------------
-   BASE OUTLINE
-------------------------- */
+/* NAME CONTOURS */
 
 function getContours(text) {
-  const path = font.getPath(text,0,0,100);
-  const commands = path.commands;
-
-  const contours = [];
-
-  let points = [];
-  let current = {x:0,y:0};
-  let start = {x:0,y:0};
+  const path=font.getPath(text,0,0,100);
+  const contours=[];
+  let points=[];
+  let current={x:0,y:0};
+  let start={x:0,y:0};
 
   function addPoint(x,y) {
     points.push({
@@ -522,87 +371,71 @@ function getContours(text) {
     });
   }
 
-  function finishContour() {
-    if (points.length >= 3) contours.push(points);
-    points = [];
+  function finish() {
+    if(points.length>=3) contours.push(points);
+    points=[];
   }
 
-  function quadratic(p0,p1,p2,t) {
-    const mt = 1-t;
-
+  function quadratic(a,b,c,t) {
+    const mt=1-t;
     return {
-      x:mt*mt*p0.x+2*mt*t*p1.x+t*t*p2.x,
-      y:mt*mt*p0.y+2*mt*t*p1.y+t*t*p2.y
+      x:mt*mt*a.x+2*mt*t*b.x+t*t*c.x,
+      y:mt*mt*a.y+2*mt*t*b.y+t*t*c.y
     };
   }
 
-  function cubic(p0,p1,p2,p3,t) {
-    const mt = 1-t;
-
+  function cubic(a,b,c,d,t) {
+    const mt=1-t;
     return {
-      x:mt*mt*mt*p0.x+
-         3*mt*mt*t*p1.x+
-         3*mt*t*t*p2.x+
-         t*t*t*p3.x,
-
-      y:mt*mt*mt*p0.y+
-         3*mt*mt*t*p1.y+
-         3*mt*t*t*p2.y+
-         t*t*t*p3.y
+      x:mt*mt*mt*a.x+3*mt*mt*t*b.x+
+         3*mt*t*t*c.x+t*t*t*d.x,
+      y:mt*mt*mt*a.y+3*mt*mt*t*b.y+
+         3*mt*t*t*c.y+t*t*t*d.y
     };
   }
 
-  commands.forEach(cmd => {
-    if (cmd.type==="M") {
-      finishContour();
-
-      current = {x:cmd.x,y:cmd.y};
-      start = {...current};
-
+  path.commands.forEach(cmd=>{
+    if(cmd.type==="M") {
+      finish();
+      current={x:cmd.x,y:cmd.y};
+      start={...current};
       addPoint(current.x,current.y);
     }
-
-    else if (cmd.type==="L") {
-      current = {x:cmd.x,y:cmd.y};
+    else if(cmd.type==="L") {
+      current={x:cmd.x,y:cmd.y};
       addPoint(current.x,current.y);
     }
+    else if(cmd.type==="Q") {
+      const a={...current};
+      const b={x:cmd.x1,y:cmd.y1};
+      const c={x:cmd.x,y:cmd.y};
 
-    else if (cmd.type==="Q") {
-      const p0 = {...current};
-      const p1 = {x:cmd.x1,y:cmd.y1};
-      const p2 = {x:cmd.x,y:cmd.y};
-
-      for (let i=1;i<=12;i++) {
-        const p = quadratic(p0,p1,p2,i/12);
+      for(let i=1;i<=12;i++) {
+        const p=quadratic(a,b,c,i/12);
         addPoint(p.x,p.y);
       }
-
-      current = p2;
+      current=c;
     }
+    else if(cmd.type==="C") {
+      const a={...current};
+      const b={x:cmd.x1,y:cmd.y1};
+      const c={x:cmd.x2,y:cmd.y2};
+      const d={x:cmd.x,y:cmd.y};
 
-    else if (cmd.type==="C") {
-      const p0 = {...current};
-      const p1 = {x:cmd.x1,y:cmd.y1};
-      const p2 = {x:cmd.x2,y:cmd.y2};
-      const p3 = {x:cmd.x,y:cmd.y};
-
-      for (let i=1;i<=14;i++) {
-        const p = cubic(p0,p1,p2,p3,i/14);
+      for(let i=1;i<=14;i++) {
+        const p=cubic(a,b,c,d,i/14);
         addPoint(p.x,p.y);
       }
-
-      current = p3;
+      current=d;
     }
-
-    else if (cmd.type==="Z") {
+    else if(cmd.type==="Z") {
       addPoint(start.x,start.y);
-      finishContour();
-      current = {...start};
+      finish();
+      current={...start};
     }
   });
 
-  finishContour();
-
+  finish();
   return contours;
 }
 
@@ -610,7 +443,7 @@ function boundsOf(paths) {
   let minX=Infinity,maxX=-Infinity;
   let minY=Infinity,maxY=-Infinity;
 
-  paths.forEach(path => path.forEach(p => {
+  paths.forEach(path=>path.forEach(p=>{
     minX=Math.min(minX,p.X);
     maxX=Math.max(maxX,p.X);
     minY=Math.min(minY,p.Y);
@@ -621,50 +454,43 @@ function boundsOf(paths) {
 }
 
 function scalePaths(paths,targetWidth) {
-  const b = boundsOf(paths);
+  const b=boundsOf(paths);
+  const width=b.maxX-b.minX;
 
-  const width = b.maxX-b.minX;
+  if(!width) throw new Error("Name outline has zero width.");
 
-  if (!width) throw new Error("Invalid base outline.");
+  const factor=targetWidth*SCALE/width;
 
-  const factor = targetWidth*SCALE/width;
-
-  return paths.map(path => path.map(p => ({
+  return paths.map(path=>path.map(p=>({
     X:Math.round((p.X-(b.minX+b.maxX)/2)*factor),
     Y:Math.round((p.Y-(b.minY+b.maxY)/2)*factor)
   })));
 }
 
-/* -------------------------
-   JOIN BASE AND ATTACHMENT
-------------------------- */
+/* CLIPPER OPERATIONS */
 
 function clipperUnion(paths) {
-  const clipper = new ClipperLib.Clipper();
+  const clipper=new ClipperLib.Clipper();
+  clipper.AddPaths(paths,ClipperLib.PolyType.ptSubject,true);
 
-  clipper.AddPaths(
-    paths,
-    ClipperLib.PolyType.ptSubject,
-    true
-  );
+  const result=new ClipperLib.Paths();
 
-  const result = new ClipperLib.Paths();
-
-  clipper.Execute(
+  const success=clipper.Execute(
     ClipperLib.ClipType.ctUnion,
     result,
     ClipperLib.PolyFillType.pftNonZero,
     ClipperLib.PolyFillType.pftNonZero
   );
 
+  if(!success||!result.length) {
+    throw new Error("Could not join the base outline.");
+  }
+
   return result;
 }
 
 function offsetPaths(paths,amount) {
-  const offset = new ClipperLib.ClipperOffset(
-    2,
-    .25*SCALE
-  );
+  const offset=new ClipperLib.ClipperOffset(2,.25*SCALE);
 
   offset.AddPaths(
     paths,
@@ -672,19 +498,21 @@ function offsetPaths(paths,amount) {
     ClipperLib.EndType.etClosedPolygon
   );
 
-  const result = new ClipperLib.Paths();
-
+  const result=new ClipperLib.Paths();
   offset.Execute(result,amount*SCALE);
+
+  if(!result.length) {
+    throw new Error("Could not create the thick base.");
+  }
 
   return result;
 }
 
-function circlePath(cx,cy,radius,steps=64) {
-  const path = [];
+function circlePath(cx,cy,radius,steps=80) {
+  const path=[];
 
-  for (let i=0;i<steps;i++) {
-    const angle = Math.PI*2*i/steps;
-
+  for(let i=0;i<steps;i++) {
+    const angle=Math.PI*2*i/steps;
     path.push({
       X:Math.round((cx+Math.cos(angle)*radius)*SCALE),
       Y:Math.round((cy+Math.sin(angle)*radius)*SCALE)
@@ -694,38 +522,34 @@ function circlePath(cx,cy,radius,steps=64) {
   return path;
 }
 
+/* BASE AND KEYRING ATTACHMENT */
+
 function makeBasePaths(letterPaths,position) {
-  const expanded = offsetPaths(
+  const expanded=offsetPaths(
     clipperUnion(letterPaths),
     BASE_OFFSET
   );
 
-  const b = boundsOf(expanded);
+  const b=boundsOf(expanded);
 
   let tabX,tabY;
 
-  if (position==="top-left") {
-    /* The attachment overlaps the base deeply */
-    tabX = b.minX/SCALE+3.5;
-    tabY = b.maxY/SCALE-2.5;
+  if(position==="top-left") {
+    tabX=b.minX/SCALE+3.5;
+    tabY=b.maxY/SCALE-2.5;
   } else {
-    /* Side attachment overlaps the left edge */
-    tabX = b.minX/SCALE+2.5;
-    tabY = (b.minY+b.maxY)/(2*SCALE);
+    tabX=b.minX/SCALE+2.5;
+    tabY=(b.minY+b.maxY)/(2*SCALE);
   }
 
-  const attachmentOuter = circlePath(tabX,tabY,7.5);
+  const outerRing=circlePath(tabX,tabY,7.5);
 
-  /* Union creates one connected base and attachment */
-  const joined = clipperUnion([
-    ...expanded,
-    attachmentOuter
-  ]);
+  /* Join the attachment to the name base */
+  const joined=clipperUnion([...expanded,outerRing]);
 
-  /* Cut the circular keyring hole from the joined shape */
-  const hole = circlePath(tabX,tabY,3.1);
-
-  const difference = new ClipperLib.Clipper();
+  /* Cut the keyring hole out of the joined shape */
+  const hole=circlePath(tabX,tabY,3.1);
+  const difference=new ClipperLib.Clipper();
 
   difference.AddPaths(
     joined,
@@ -739,59 +563,52 @@ function makeBasePaths(letterPaths,position) {
     true
   );
 
-  const finalPaths = new ClipperLib.Paths();
+  const finalPaths=new ClipperLib.Paths();
 
-  difference.Execute(
+  const success=difference.Execute(
     ClipperLib.ClipType.ctDifference,
     finalPaths,
     ClipperLib.PolyFillType.pftNonZero,
     ClipperLib.PolyFillType.pftNonZero
   );
 
+  if(!success||!finalPaths.length) {
+    throw new Error("Could not create the keyring hole.");
+  }
+
   return finalPaths;
 }
 
-/* -------------------------
-   BASE SHAPE WITH HOLE
-------------------------- */
+/* CONVERT BASE OUTLINE TO THREE.JS SHAPES */
 
 function pointInside(point,polygon) {
-  let inside = false;
+  let inside=false;
 
-  for (
-    let i=0,j=polygon.length-1;
-    i<polygon.length;
-    j=i++
-  ) {
-    const a=polygon[i];
-    const b=polygon[j];
+  for(let i=0,j=polygon.length-1;i<polygon.length;j=i++) {
+    const a=polygon[i],b=polygon[j];
 
-    const crosses =
+    const crosses=
       ((a.Y>point.Y)!==(b.Y>point.Y)) &&
-      (
-        point.X <
-        (b.X-a.X)*(point.Y-a.Y)/(b.Y-a.Y)+a.X
-      );
+      point.X<(b.X-a.X)*(point.Y-a.Y)/(b.Y-a.Y)+a.X;
 
-    if (crosses) inside=!inside;
+    if(crosses) inside=!inside;
   }
 
   return inside;
 }
 
 function pathToShape(path) {
-  const shape = new THREE.Shape();
+  const shape=new THREE.Shape();
 
-  path.forEach((p,i) => {
+  path.forEach((p,i)=>{
     const x=p.X/SCALE;
     const y=p.Y/SCALE;
 
-    if (i===0) shape.moveTo(x,y);
+    if(i===0) shape.moveTo(x,y);
     else shape.lineTo(x,y);
   });
 
   shape.closePath();
-
   return shape;
 }
 
@@ -799,8 +616,8 @@ function pathsToShapes(paths) {
   const outers=[];
   const holes=[];
 
-  paths.forEach(path => {
-    if (ClipperLib.Clipper.Orientation(path)) {
+  paths.forEach(path=>{
+    if(ClipperLib.Clipper.Orientation(path)) {
       outers.push(path);
     } else {
       holes.push(path);
@@ -809,23 +626,20 @@ function pathsToShapes(paths) {
 
   const shapes=outers.map(pathToShape);
 
-  holes.forEach(hole => {
-    const testPoint=hole[0];
-
-    for (let i=0;i<outers.length;i++) {
-      if (pointInside(testPoint,outers[i])) {
+  holes.forEach(hole=>{
+    for(let i=0;i<outers.length;i++) {
+      if(pointInside(hole[0],outers[i])) {
         const holePath=new THREE.Path();
 
-        hole.forEach((p,j) => {
+        hole.forEach((p,j)=>{
           const x=p.X/SCALE;
           const y=p.Y/SCALE;
 
-          if (j===0) holePath.moveTo(x,y);
+          if(j===0) holePath.moveTo(x,y);
           else holePath.lineTo(x,y);
         });
 
         holePath.closePath();
-
         shapes[i].holes.push(holePath);
         break;
       }
@@ -838,6 +652,10 @@ function pathsToShapes(paths) {
 function makeBaseMesh(paths,material) {
   const shapes=pathsToShapes(paths);
 
+  if(!shapes.length) {
+    throw new Error("The base shape is empty.");
+  }
+
   const geometry=new THREE.ExtrudeGeometry(shapes,{
     depth:BASE_THICKNESS,
     bevelEnabled:false,
@@ -848,20 +666,89 @@ function makeBaseMesh(paths,material) {
   geometry.computeVertexNormals();
 
   const mesh=new THREE.Mesh(geometry,material);
-
   mesh.castShadow=true;
   mesh.receiveShadow=true;
 
   return mesh;
 }
 
-/* -------------------------
-   REBUILD KEYCHAIN
-------------------------- */
+/* RAISED NAME GEOMETRY */
+
+function getNameGeometry(text) {
+  const path=font.getPath(text,0,0,100);
+  const pathData=path.toPathData(3);
+
+  const svg=`
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="1000" height="500"
+         viewBox="-30 -250 1100 500">
+      <path d="${pathData}" fill="black"
+            fill-rule="evenodd"/>
+    </svg>
+  `;
+
+  /*
+    IMPORTANT FIX:
+    SVGLoader.parse() is called on an instance,
+    not directly on THREE.SVGLoader.
+  */
+  const svgLoader=new THREE.SVGLoader();
+  const parsed=svgLoader.parse(svg);
+
+  const shapes=[];
+
+  parsed.paths.forEach(svgPath=>{
+    const newShapes=THREE.SVGLoader.createShapes(svgPath);
+    shapes.push(...newShapes);
+  });
+
+  if(!shapes.length) {
+    throw new Error("The raised name could not be created.");
+  }
+
+  const geometry=new THREE.ExtrudeGeometry(shapes,{
+    depth:NAME_HEIGHT,
+    bevelEnabled:true,
+    bevelSegments:3,
+    steps:1,
+    bevelSize:.12,
+    bevelThickness:.12,
+    curveSegments:16
+  });
+
+  geometry.computeBoundingBox();
+
+  const bounds=geometry.boundingBox;
+  const width=bounds.max.x-bounds.min.x;
+
+  if(!width) throw new Error("The name has no width.");
+
+  const factor=76/width;
+
+  /*
+    Flip the SVG vertical direction so the raised
+    lettering matches the base outline direction.
+  */
+  geometry.scale(factor,-factor,1);
+
+  geometry.computeBoundingBox();
+
+  const centerX=
+    (geometry.boundingBox.min.x+geometry.boundingBox.max.x)/2;
+  const centerY=
+    (geometry.boundingBox.min.y+geometry.boundingBox.max.y)/2;
+
+  geometry.translate(-centerX,-centerY,0);
+  geometry.computeVertexNormals();
+
+  return geometry;
+}
+
+/* REMOVE PREVIOUS MODEL */
 
 function removeOldModel() {
-  [baseMesh,nameMesh].forEach(mesh => {
-    if (mesh) {
+  [baseMesh,nameMesh].forEach(mesh=>{
+    if(mesh) {
       scene.remove(mesh);
       mesh.geometry.dispose();
       mesh.material.dispose();
@@ -872,13 +759,18 @@ function removeOldModel() {
   nameMesh=null;
 }
 
+/* REBUILD KEYCHAIN */
+
 function rebuildKeychain() {
-  if (!font || !scene) return;
+  if(!font||!scene) return;
 
   const raw=nameInput.value.trim();
 
-  if (!raw) {
+  if(!raw) {
     removeOldModel();
+    loading.textContent="Enter a name to see your keychain.";
+    loading.style.display="block";
+    updatePrice();
     return;
   }
 
@@ -887,8 +779,8 @@ function rebuildKeychain() {
 
     let letterPaths=getContours(raw);
 
-    if (!letterPaths.length) {
-      throw new Error("No lettering was created.");
+    if(!letterPaths.length) {
+      throw new Error("No lettering outlines were found.");
     }
 
     letterPaths=scalePaths(letterPaths,76);
@@ -913,26 +805,20 @@ function rebuildKeychain() {
 
     baseMesh=makeBaseMesh(basePaths,baseMaterial);
 
-    /* Generate the customer's actual name */
-    const nameGeometry=getNameShapes(raw);
+    const nameGeometry=getNameGeometry(raw);
 
-    nameMesh=new THREE.Mesh(
-      nameGeometry,
-      nameMaterial
-    );
+    nameMesh=new THREE.Mesh(nameGeometry,nameMaterial);
 
-    /* Place the name directly on top of the base */
-    nameMesh.position.z=BASE_THICKNESS+.03;
-
+    nameMesh.position.z=BASE_THICKNESS+.04;
     nameMesh.castShadow=true;
     nameMesh.receiveShadow=true;
 
     scene.add(baseMesh);
     scene.add(nameMesh);
 
-    /* Centre the complete model */
-    const box=new THREE.Box3().setFromObject(baseMesh);
-    const center=box.getCenter(new THREE.Vector3());
+    /* Centre both parts together */
+    const baseBox=new THREE.Box3().setFromObject(baseMesh);
+    const center=baseBox.getCenter(new THREE.Vector3());
 
     baseMesh.position.x-=center.x;
     baseMesh.position.y-=center.y;
@@ -940,19 +826,18 @@ function rebuildKeychain() {
     nameMesh.position.x-=center.x;
     nameMesh.position.y-=center.y;
 
-    /* Fit camera to the complete model */
+    /* Frame the complete keychain */
     const completeBox=new THREE.Box3().setFromObject(baseMesh);
     completeBox.expandByObject(nameMesh);
 
     const size=completeBox.getSize(new THREE.Vector3());
     const modelCenter=completeBox.getCenter(new THREE.Vector3());
-
     const maxDimension=Math.max(size.x,size.y,size.z);
 
     camera.position.set(
       modelCenter.x,
-      modelCenter.y-maxDimension*1.5,
-      modelCenter.z+maxDimension*1.35
+      modelCenter.y-maxDimension*1.65,
+      modelCenter.z+maxDimension*1.5
     );
 
     controls.target.copy(modelCenter);
@@ -964,7 +849,7 @@ function rebuildKeychain() {
     console.error("Keychain generation error:",error);
 
     loading.textContent=
-      "Could not generate this keychain. Please try again.";
+      "Preview error: "+(error.message||"Unknown error");
 
     loading.style.display="block";
   }
@@ -972,73 +857,61 @@ function rebuildKeychain() {
   updatePrice();
 }
 
-/* -------------------------
-   UPDATE COLOURS
-------------------------- */
+/* COLOURS */
 
 function updateMaterials() {
-  if (baseMesh) {
+  if(baseMesh) {
     baseMesh.material.color.set(baseColor.hex);
   }
 
-  if (nameMesh) {
+  if(nameMesh) {
     nameMesh.material.color.set(nameColor.hex);
   }
 }
 
-/* -------------------------
-   PRICE
-------------------------- */
+/* PRICE */
 
 function updatePrice() {
   const letters=nameInput.value.trim().replace(/\s/g,"").length;
 
   let price=350;
+  if(letters>=6&&letters<=8) price=450;
+  if(letters>=9) price=550;
 
-  if (letters>=6 && letters<=8) price=450;
-  if (letters>=9) price=550;
-
-  document.getElementById("price").textContent=
-    "Rs. "+price;
+  document.getElementById("price").textContent="Rs. "+price;
 }
 
-/* -------------------------
-   INPUT EVENTS
-------------------------- */
+/* INPUT EVENTS */
 
 function scheduleRebuild() {
   clearTimeout(rebuildTimer);
-
-  rebuildTimer=setTimeout(rebuildKeychain,200);
+  rebuildTimer=setTimeout(rebuildKeychain,250);
 }
 
-nameInput.addEventListener("input",() => {
+nameInput.addEventListener("input",()=>{
   updatePrice();
   scheduleRebuild();
 });
 
 attachment.addEventListener("change",scheduleRebuild);
 
-/* -------------------------
-   WHATSAPP ORDER
-------------------------- */
+/* WHATSAPP ORDER */
 
-orderButton.addEventListener("click",() => {
+orderButton.addEventListener("click",()=>{
   const name=nameInput.value.trim();
   const letters=name.replace(/\s/g,"").length;
 
-  if (!name || !letters) {
+  if(!name||!letters) {
     alert("Please enter your name first.");
     return;
   }
 
   let price=350;
-
-  if (letters>=6 && letters<=8) price=450;
-  if (letters>=9) price=550;
+  if(letters>=6&&letters<=8) price=450;
+  if(letters>=9) price=550;
 
   const position=
-    attachment.value==="top-left" ? "Top" : "Side";
+    attachment.value==="top-left"?"Top":"Side";
 
   const message=
 `Hello She3DPrints! I would like to order a custom name keychain.
@@ -1051,8 +924,8 @@ Price: Rs. ${price}
 
 Thank you!`;
 
-  /* REPLACE WITH YOUR WHATSAPP NUMBER */
-  const phoneNumber="94777224525";
+  /* PUT YOUR WHATSAPP NUMBER HERE */
+  const phoneNumber="947XXXXXXXX";
 
   window.open(
     "https://wa.me/"+phoneNumber+
@@ -1061,43 +934,36 @@ Thank you!`;
   );
 });
 
-/* -------------------------
-   LOAD FONT AND START
-------------------------- */
+/* LOAD FONT AND START */
 
 async function start() {
   try {
-    if (
-      !window.THREE ||
-      !THREE.OrbitControls ||
-      !THREE.SVGLoader ||
-      !window.opentype ||
-      !window.ClipperLib
-    ) {
-      throw new Error("A required 3D library did not load.");
-    }
+    if(!window.THREE) throw new Error("Three.js did not load.");
+    if(!THREE.OrbitControls) throw new Error("OrbitControls did not load.");
+    if(!THREE.SVGLoader) throw new Error("SVGLoader did not load.");
+    if(!window.opentype) throw new Error("OpenType did not load.");
+    if(!window.ClipperLib) throw new Error("Clipper did not load.");
 
     initThree();
 
-    font=await new Promise((resolve,reject) => {
+    font=await new Promise((resolve,reject)=>{
       opentype.load(
-        "https://cdn.jsdelivr.net/gh/google/fonts@main/apache/satisfy/Satisfy-Regular.ttf",
-        (error,loadedFont) => {
-          if (error) reject(error);
+        "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/satisfy/Satisfy-Regular.ttf",
+        (error,loadedFont)=>{
+          if(error) reject(new Error("Satisfy font could not load."));
           else resolve(loadedFont);
         }
       );
     });
 
     orderButton.disabled=false;
-
     rebuildKeychain();
 
   } catch(error) {
     console.error("Preview startup error:",error);
 
     loading.textContent=
-      "3D preview could not load. Please check the internet connection and reload.";
+      "Preview loading error: "+(error.message||"Unknown error");
 
     loading.style.display="block";
   }
