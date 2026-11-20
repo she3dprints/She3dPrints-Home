@@ -5,216 +5,97 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Custom Name Keychains | She3DPrints</title>
-
 <style>
-:root {
-  --milk:#FBF7F4;
-  --oat:#E8DED5;
-  --brown:#684332;
-  --dark:#30251F;
-}
-* {box-sizing:border-box}
-
-body {
-  margin:0;
-  background:var(--milk);
-  color:var(--dark);
-  font-family:Arial,sans-serif;
-}
-
-header {
-  padding:22px 16px;
-  text-align:center;
-  border-bottom:1px solid var(--oat);
-}
-header h1 {
-  margin:0;
-  font-size:25px;
-  color:var(--brown);
-}
-header p {
-  margin:7px 0 0;
-  font-size:13px;
-}
-
-.container {
-  max-width:1050px;
-  margin:auto;
-  padding:20px 15px 40px;
-}
-.layout {
-  display:grid;
-  grid-template-columns:1.15fr .85fr;
-  gap:25px;
-}
-.preview-box,.panel {
-  background:white;
-  border:1px solid var(--oat);
-  border-radius:16px;
-}
-.preview-box {overflow:hidden}
-#preview {
-  width:100%;
-  height:420px;
-  display:block;
-  touch-action:none;
-}
-.preview-note {
-  text-align:center;
-  font-size:12px;
-  color:#82756D;
-  padding:0 10px 15px;
-}
-.panel {padding:22px}
-h2 {
-  font-size:20px;
-  margin:0 0 20px;
-  color:var(--brown);
-}
-.field {margin-bottom:20px}
-label {
-  display:block;
-  font-size:14px;
-  font-weight:bold;
-  margin-bottom:9px;
-}
-input[type="text"],select {
-  width:100%;
-  padding:13px;
-  border:1px solid #D9CBC1;
-  border-radius:9px;
-  font-size:16px;
-  background:white;
-  color:var(--dark);
-}
-.colors {
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-}
-.swatch {
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  border:2px solid #ddd;
-  cursor:pointer;
-  padding:0;
-}
-.swatch.selected {
-  outline:2px solid var(--brown);
-  outline-offset:3px;
-}
-.swatch.white {border:1px solid #aaa}
-.price {
-  background:var(--milk);
-  padding:15px;
-  border-radius:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin:18px 0;
-}
-.price strong {
-  font-size:22px;
-  color:var(--brown);
-}
-.order-button {
-  border:0;
-  border-radius:10px;
-  padding:15px;
-  width:100%;
-  background:var(--brown);
-  color:white;
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer;
-}
-.order-button:disabled {opacity:.5}
-.small {
-  font-size:12px;
-  color:#82756D;
-  line-height:1.5;
-}
-.loading {
-  text-align:center;
-  padding:12px;
-  font-size:13px;
-  color:var(--brown);
-  overflow-wrap:anywhere;
-}
-@media(max-width:760px) {
-  .layout {grid-template-columns:1fr}
-  #preview {height:340px}
-  .panel {padding:18px}
-}
+:root{--milk:#FBF7F4;--oat:#E8DED5;--brown:#684332;--dark:#30251F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--milk);color:var(--dark);font-family:Arial,sans-serif}
+header{padding:22px 16px;text-align:center;border-bottom:1px solid var(--oat)}
+header h1{margin:0;font-size:25px;color:var(--brown)}
+header p{margin:7px 0 0;font-size:13px}
+.container{max-width:1050px;margin:auto;padding:20px 15px 40px}
+.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:25px}
+.preview-box,.panel{background:white;border:1px solid var(--oat);border-radius:16px}
+.preview-box{overflow:hidden}
+#preview{width:100%;height:420px;display:block;touch-action:none}
+.preview-note{text-align:center;font-size:12px;color:#82756D;padding:0 10px 15px}
+.panel{padding:22px}
+h2{font-size:20px;margin:0 0 20px;color:var(--brown)}
+.field{margin-bottom:20px}
+label{display:block;font-size:14px;font-weight:bold;margin-bottom:9px}
+input[type=text],select{width:100%;padding:13px;border:1px solid #D9CBC1;border-radius:9px;font-size:16px;background:white;color:var(--dark)}
+.colors{display:flex;flex-wrap:wrap;gap:12px}
+.swatch{width:34px;height:34px;border-radius:50%;border:2px solid #ddd;cursor:pointer;padding:0}
+.swatch.selected{outline:2px solid var(--brown);outline-offset:3px}
+.swatch.white{border:1px solid #aaa}
+.price{background:var(--milk);padding:15px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin:18px 0}
+.price strong{font-size:22px;color:var(--brown)}
+.order-button{border:0;border-radius:10px;padding:15px;width:100%;background:var(--brown);color:white;font-size:15px;font-weight:bold;cursor:pointer}
+.order-button:disabled{opacity:.5}
+.small{font-size:12px;color:#82756D;line-height:1.5}
+.loading{text-align:center;padding:12px;font-size:13px;color:var(--brown);overflow-wrap:anywhere}
+@media(max-width:760px){.layout{grid-template-columns:1fr}#preview{height:340px}.panel{padding:18px}}
 </style>
 </head>
-
 <body>
 
 <header>
-  <h1>She3DPrints</h1>
-  <p>Custom Name Keychains</p>
+<h1>She3DPrints</h1>
+<p>Custom Name Keychains</p>
 </header>
 
 <div class="container">
-  <div class="layout">
+<div class="layout">
 
-    <div class="preview-box">
-      <div id="preview"></div>
-      <div class="preview-note">Drag to rotate · Pinch to zoom</div>
-      <div class="loading" id="loading">Preparing 3D preview...</div>
-    </div>
+<div class="preview-box">
+<div id="preview"></div>
+<div class="preview-note">Drag to rotate · Pinch to zoom</div>
+<div class="loading" id="loading">Preparing 3D preview...</div>
+</div>
 
-    <div class="panel">
-      <h2>Customise Your Keychain</h2>
+<div class="panel">
+<h2>Customise Your Keychain</h2>
 
-      <div class="field">
-        <label for="customerName">Your Name</label>
-        <input type="text" id="customerName"
-          maxlength="18" value="Asma"
-          placeholder="Type your name" autocomplete="off">
-      </div>
+<div class="field">
+<label for="customerName">Your Name</label>
+<input type="text" id="customerName" maxlength="18" value="Asma" placeholder="Type your name" autocomplete="off">
+</div>
 
-      <div class="field">
-        <label>Base Colour</label>
-        <div class="colors" id="baseColors"></div>
-      </div>
+<div class="field">
+<label>Base Colour</label>
+<div class="colors" id="baseColors"></div>
+</div>
 
-      <div class="field">
-        <label>Name Colour</label>
-        <div class="colors" id="nameColors"></div>
-      </div>
+<div class="field">
+<label>Name Colour</label>
+<div class="colors" id="nameColors"></div>
+</div>
 
-      <div class="field">
-        <label for="attachment">Keyring Position</label>
-        <select id="attachment">
-          <option value="top-left">Top</option>
-          <option value="left">Side</option>
-        </select>
-      </div>
+<div class="field">
+<label for="attachment">Keyring Position</label>
+<select id="attachment">
+<option value="top-left">Top</option>
+<option value="left">Side</option>
+</select>
+</div>
 
-      <div class="price">
-        <span>Keychain Price</span>
-        <strong id="price">Rs. 350</strong>
-      </div>
+<div class="price">
+<span>Keychain Price</span>
+<strong id="price">Rs. 350</strong>
+</div>
 
-      <p class="small">
-        1–5 letters: Rs.350<br>
-        6–8 letters: Rs.450<br>
-        9 or more letters: Rs.550
-      </p>
+<p class="small">
+1–5 letters: Rs.350<br>
+6–8 letters: Rs.450<br>
+9 or more letters: Rs.550
+</p>
 
-      <button class="order-button" id="orderButton" disabled>
-        Order via WhatsApp
-      </button>
+<button class="order-button" id="orderButton" disabled>Order via WhatsApp</button>
 
-      <p class="small" style="text-align:center;margin-top:13px">
-        Your personalised name will be used to create your keychain.
-      </p>
-    </div>
-
-  </div>
+<p class="small" style="text-align:center;margin-top:13px">
+Your personalised name will be used to create your keychain.
+</p>
+</div>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -226,25 +107,20 @@ input[type="text"],select {
 <script>
 "use strict";
 
-/* SETTINGS */
-
-const COLORS = [
-  {name:"Light Pink",hex:"#E7A1B5"},
-  {name:"Dark Green",hex:"#174C38"},
-  {name:"Matcha Green",hex:"#A8B98A"},
-  {name:"Black",hex:"#222222"},
-  {name:"White",hex:"#FFFFFF"},
-  {name:"Brown",hex:"#684332"}
+const COLORS=[
+{name:"Light Pink",hex:"#E7A1B5"},
+{name:"Dark Green",hex:"#174C38"},
+{name:"Matcha Green",hex:"#A8B98A"},
+{name:"Black",hex:"#222222"},
+{name:"White",hex:"#FFFFFF"},
+{name:"Brown",hex:"#684332"}
 ];
 
 let baseColor=COLORS[1];
 let nameColor=COLORS[0];
-
 let font=null;
 let scene,camera,renderer,controls;
-let baseMesh=null;
-let nameMesh=null;
-let rebuildTimer=null;
+let baseMesh=null,nameMesh=null,rebuildTimer=null;
 
 const SCALE=1000;
 const BASE_THICKNESS=3.5;
@@ -257,664 +133,388 @@ const nameInput=document.getElementById("customerName");
 const attachment=document.getElementById("attachment");
 const orderButton=document.getElementById("orderButton");
 
-/* COLOUR BUTTONS */
-
-function makeSwatches(containerId,selected,callback) {
-  const container=document.getElementById(containerId);
-
-  COLORS.forEach(color=>{
-    const button=document.createElement("button");
-    button.type="button";
-    button.className="swatch"+
-      (color.hex==="#FFFFFF"?" white":"")+
-      (color===selected?" selected":"");
-    button.style.background=color.hex;
-    button.title=color.name;
-    button.setAttribute("aria-label",color.name);
-
-    button.addEventListener("click",()=>{
-      container.querySelectorAll(".swatch").forEach(s=>
-        s.classList.remove("selected")
-      );
-      button.classList.add("selected");
-      callback(color);
-    });
-
-    container.appendChild(button);
-  });
-}
-
-makeSwatches("baseColors",baseColor,color=>{
-  baseColor=color;
-  updateMaterials();
+function makeSwatches(containerId,selected,callback){
+const container=document.getElementById(containerId);
+COLORS.forEach(color=>{
+const button=document.createElement("button");
+button.type="button";
+button.className="swatch"+(color.hex==="#FFFFFF"?" white":"")+(color===selected?" selected":"");
+button.style.background=color.hex;
+button.title=color.name;
+button.setAttribute("aria-label",color.name);
+button.addEventListener("click",()=>{
+container.querySelectorAll(".swatch").forEach(s=>s.classList.remove("selected"));
+button.classList.add("selected");
+callback(color);
 });
-
-makeSwatches("nameColors",nameColor,color=>{
-  nameColor=color;
-  updateMaterials();
+container.appendChild(button);
 });
-
-/* THREE.JS */
-
-function initThree() {
-  scene=new THREE.Scene();
-  scene.background=new THREE.Color("#FFFFFF");
-
-  camera=new THREE.PerspectiveCamera(
-    38,preview.clientWidth/preview.clientHeight,0.1,1000
-  );
-
-  camera.position.set(0,-100,100);
-
-  renderer=new THREE.WebGLRenderer({
-    antialias:true,
-    alpha:false
-  });
-
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setSize(preview.clientWidth,preview.clientHeight);
-  renderer.outputEncoding=THREE.sRGBEncoding;
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-
-  preview.appendChild(renderer.domElement);
-
-  controls=new THREE.OrbitControls(camera,renderer.domElement);
-  controls.enableDamping=true;
-  controls.dampingFactor=.07;
-  controls.minDistance=35;
-  controls.maxDistance=220;
-
-  scene.add(new THREE.AmbientLight(0xffffff,.85));
-
-  const light=new THREE.DirectionalLight(0xffffff,1.2);
-  light.position.set(-35,45,90);
-  scene.add(light);
-
-  const secondLight=new THREE.DirectionalLight(0xffffff,.45);
-  secondLight.position.set(45,-35,40);
-  scene.add(secondLight);
-
-  animate();
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  if(controls) controls.update();
-  if(renderer&&scene&&camera) renderer.render(scene,camera);
+makeSwatches("baseColors",baseColor,color=>{baseColor=color;updateMaterials()});
+makeSwatches("nameColors",nameColor,color=>{nameColor=color;updateMaterials()});
+
+function initThree(){
+scene=new THREE.Scene();
+scene.background=new THREE.Color("#FFFFFF");
+camera=new THREE.PerspectiveCamera(38,preview.clientWidth/preview.clientHeight,.1,1000);
+camera.position.set(0,-100,100);
+
+renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(preview.clientWidth,preview.clientHeight);
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+preview.appendChild(renderer.domElement);
+
+controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;
+controls.dampingFactor=.07;
+controls.minDistance=35;
+controls.maxDistance=220;
+
+scene.add(new THREE.AmbientLight(0xffffff,.85));
+const light=new THREE.DirectionalLight(0xffffff,1.2);
+light.position.set(-35,45,90);
+scene.add(light);
+const secondLight=new THREE.DirectionalLight(0xffffff,.45);
+secondLight.position.set(45,-35,40);
+scene.add(secondLight);
+animate();
 }
 
-function resizePreview() {
-  if(!renderer) return;
-  const width=preview.clientWidth;
-  const height=preview.clientHeight;
-  camera.aspect=width/height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width,height);
+function animate(){
+requestAnimationFrame(animate);
+if(controls)controls.update();
+if(renderer&&scene&&camera)renderer.render(scene,camera);
 }
 
+function resizePreview(){
+if(!renderer)return;
+const width=preview.clientWidth,height=preview.clientHeight;
+camera.aspect=width/height;
+camera.updateProjectionMatrix();
+renderer.setSize(width,height);
+}
 window.addEventListener("resize",resizePreview);
 
-/* NAME CONTOURS */
+function getContours(text){
+const path=font.getPath(text,0,0,100);
+const contours=[];
+let points=[],current={x:0,y:0},start={x:0,y:0};
 
-function getContours(text) {
-  const path=font.getPath(text,0,0,100);
-  const contours=[];
-  let points=[];
-  let current={x:0,y:0};
-  let start={x:0,y:0};
+function addPoint(x,y){points.push({X:Math.round(x*SCALE),Y:Math.round(-y*SCALE)})}
+function finish(){if(points.length>=3)contours.push(points);points=[]}
 
-  function addPoint(x,y) {
-    points.push({
-      X:Math.round(x*SCALE),
-      Y:Math.round(-y*SCALE)
-    });
-  }
-
-  function finish() {
-    if(points.length>=3) contours.push(points);
-    points=[];
-  }
-
-  function quadratic(a,b,c,t) {
-    const mt=1-t;
-    return {
-      x:mt*mt*a.x+2*mt*t*b.x+t*t*c.x,
-      y:mt*mt*a.y+2*mt*t*b.y+t*t*c.y
-    };
-  }
-
-  function cubic(a,b,c,d,t) {
-    const mt=1-t;
-    return {
-      x:mt*mt*mt*a.x+3*mt*mt*t*b.x+
-         3*mt*t*t*c.x+t*t*t*d.x,
-      y:mt*mt*mt*a.y+3*mt*mt*t*b.y+
-         3*mt*t*t*c.y+t*t*t*d.y
-    };
-  }
-
-  path.commands.forEach(cmd=>{
-    if(cmd.type==="M") {
-      finish();
-      current={x:cmd.x,y:cmd.y};
-      start={...current};
-      addPoint(current.x,current.y);
-    }
-    else if(cmd.type==="L") {
-      current={x:cmd.x,y:cmd.y};
-      addPoint(current.x,current.y);
-    }
-    else if(cmd.type==="Q") {
-      const a={...current};
-      const b={x:cmd.x1,y:cmd.y1};
-      const c={x:cmd.x,y:cmd.y};
-
-      for(let i=1;i<=12;i++) {
-        const p=quadratic(a,b,c,i/12);
-        addPoint(p.x,p.y);
-      }
-      current=c;
-    }
-    else if(cmd.type==="C") {
-      const a={...current};
-      const b={x:cmd.x1,y:cmd.y1};
-      const c={x:cmd.x2,y:cmd.y2};
-      const d={x:cmd.x,y:cmd.y};
-
-      for(let i=1;i<=14;i++) {
-        const p=cubic(a,b,c,d,i/14);
-        addPoint(p.x,p.y);
-      }
-      current=d;
-    }
-    else if(cmd.type==="Z") {
-      addPoint(start.x,start.y);
-      finish();
-      current={...start};
-    }
-  });
-
-  finish();
-  return contours;
+function quadratic(a,b,c,t){
+const mt=1-t;
+return{x:mt*mt*a.x+2*mt*t*b.x+t*t*c.x,y:mt*mt*a.y+2*mt*t*b.y+t*t*c.y};
+}
+function cubic(a,b,c,d,t){
+const mt=1-t;
+return{x:mt*mt*mt*a.x+3*mt*mt*t*b.x+3*mt*t*t*c.x+t*t*t*d.x,y:mt*mt*mt*a.y+3*mt*mt*t*b.y+3*mt*t*t*c.y+t*t*t*d.y};
 }
 
-function boundsOf(paths) {
-  let minX=Infinity,maxX=-Infinity;
-  let minY=Infinity,maxY=-Infinity;
-
-  paths.forEach(path=>path.forEach(p=>{
-    minX=Math.min(minX,p.X);
-    maxX=Math.max(maxX,p.X);
-    minY=Math.min(minY,p.Y);
-    maxY=Math.max(maxY,p.Y);
-  }));
-
-  return {minX,maxX,minY,maxY};
+path.commands.forEach(cmd=>{
+if(cmd.type==="M"){
+finish();current={x:cmd.x,y:cmd.y};start={...current};addPoint(current.x,current.y);
+}else if(cmd.type==="L"){
+current={x:cmd.x,y:cmd.y};addPoint(current.x,current.y);
+}else if(cmd.type==="Q"){
+const a={...current},b={x:cmd.x1,y:cmd.y1},c={x:cmd.x,y:cmd.y};
+for(let i=1;i<=12;i++){const p=quadratic(a,b,c,i/12);addPoint(p.x,p.y)}
+current=c;
+}else if(cmd.type==="C"){
+const a={...current},b={x:cmd.x1,y:cmd.y1},c={x:cmd.x2,y:cmd.y2},d={x:cmd.x,y:cmd.y};
+for(let i=1;i<=14;i++){const p=cubic(a,b,c,d,i/14);addPoint(p.x,p.y)}
+current=d;
+}else if(cmd.type==="Z"){
+addPoint(start.x,start.y);finish();current={...start};
+}
+});
+finish();
+return contours;
 }
 
-function scalePaths(paths,targetWidth) {
-  const b=boundsOf(paths);
-  const width=b.maxX-b.minX;
-
-  if(!width) throw new Error("Name outline has zero width.");
-
-  const factor=targetWidth*SCALE/width;
-
-  return paths.map(path=>path.map(p=>({
-    X:Math.round((p.X-(b.minX+b.maxX)/2)*factor),
-    Y:Math.round((p.Y-(b.minY+b.maxY)/2)*factor)
-  })));
+function boundsOf(paths){
+let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+paths.forEach(path=>path.forEach(p=>{
+minX=Math.min(minX,p.X);maxX=Math.max(maxX,p.X);
+minY=Math.min(minY,p.Y);maxY=Math.max(maxY,p.Y);
+}));
+return{minX,maxX,minY,maxY};
 }
 
-/* CLIPPER OPERATIONS */
-
-function clipperUnion(paths) {
-  const clipper=new ClipperLib.Clipper();
-  clipper.AddPaths(paths,ClipperLib.PolyType.ptSubject,true);
-
-  const result=new ClipperLib.Paths();
-
-  const success=clipper.Execute(
-    ClipperLib.ClipType.ctUnion,
-    result,
-    ClipperLib.PolyFillType.pftNonZero,
-    ClipperLib.PolyFillType.pftNonZero
-  );
-
-  if(!success||!result.length) {
-    throw new Error("Could not join the base outline.");
-  }
-
-  return result;
+function scalePaths(paths,targetWidth){
+const b=boundsOf(paths),width=b.maxX-b.minX;
+if(!width)throw new Error("Name outline has zero width.");
+const factor=targetWidth*SCALE/width;
+return paths.map(path=>path.map(p=>({
+X:Math.round((p.X-(b.minX+b.maxX)/2)*factor),
+Y:Math.round((p.Y-(b.minY+b.maxY)/2)*factor)
+})));
 }
 
-function offsetPaths(paths,amount) {
-  const offset=new ClipperLib.ClipperOffset(2,.25*SCALE);
-
-  offset.AddPaths(
-    paths,
-    ClipperLib.JoinType.jtRound,
-    ClipperLib.EndType.etClosedPolygon
-  );
-
-  const result=new ClipperLib.Paths();
-  offset.Execute(result,amount*SCALE);
-
-  if(!result.length) {
-    throw new Error("Could not create the thick base.");
-  }
-
-  return result;
+function clipperUnion(paths){
+const clipper=new ClipperLib.Clipper();
+clipper.AddPaths(paths,ClipperLib.PolyType.ptSubject,true);
+const result=new ClipperLib.Paths();
+const success=clipper.Execute(ClipperLib.ClipType.ctUnion,result,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
+if(!success||!result.length)throw new Error("Could not join the base outline.");
+return result;
 }
 
-function circlePath(cx,cy,radius,steps=80) {
-  const path=[];
-
-  for(let i=0;i<steps;i++) {
-    const angle=Math.PI*2*i/steps;
-    path.push({
-      X:Math.round((cx+Math.cos(angle)*radius)*SCALE),
-      Y:Math.round((cy+Math.sin(angle)*radius)*SCALE)
-    });
-  }
-
-  return path;
+function offsetPaths(paths,amount){
+const offset=new ClipperLib.ClipperOffset(2,.25*SCALE);
+offset.AddPaths(paths,ClipperLib.JoinType.jtRound,ClipperLib.EndType.etClosedPolygon);
+const result=new ClipperLib.Paths();
+offset.Execute(result,amount*SCALE);
+if(!result.length)throw new Error("Could not create the base.");
+return result;
 }
 
-/* BASE AND KEYRING ATTACHMENT */
-
-function makeBasePaths(letterPaths,position) {
-  const expanded=offsetPaths(
-    clipperUnion(letterPaths),
-    BASE_OFFSET
-  );
-
-  const b=boundsOf(expanded);
-
-  let tabX,tabY;
-
-  if(position==="top-left") {
-    tabX=b.minX/SCALE+3.5;
-    tabY=b.maxY/SCALE-2.5;
-  } else {
-    tabX=b.minX/SCALE+2.5;
-    tabY=(b.minY+b.maxY)/(2*SCALE);
-  }
-
-  const outerRing=circlePath(tabX,tabY,7.5);
-
-  /* Join the attachment to the name base */
-  const joined=clipperUnion([...expanded,outerRing]);
-
-  /* Cut the keyring hole out of the joined shape */
-  const hole=circlePath(tabX,tabY,3.1);
-  const difference=new ClipperLib.Clipper();
-
-  difference.AddPaths(
-    joined,
-    ClipperLib.PolyType.ptSubject,
-    true
-  );
-
-  difference.AddPath(
-    hole,
-    ClipperLib.PolyType.ptClip,
-    true
-  );
-
-  const finalPaths=new ClipperLib.Paths();
-
-  const success=difference.Execute(
-    ClipperLib.ClipType.ctDifference,
-    finalPaths,
-    ClipperLib.PolyFillType.pftNonZero,
-    ClipperLib.PolyFillType.pftNonZero
-  );
-
-  if(!success||!finalPaths.length) {
-    throw new Error("Could not create the keyring hole.");
-  }
-
-  return finalPaths;
+function circlePath(cx,cy,radius,steps=80){
+const path=[];
+for(let i=0;i<steps;i++){
+const angle=Math.PI*2*i/steps;
+path.push({X:Math.round((cx+Math.cos(angle)*radius)*SCALE),Y:Math.round((cy+Math.sin(angle)*radius)*SCALE)});
+}
+return path;
 }
 
-/* CONVERT BASE OUTLINE TO THREE.JS SHAPES */
+function makeBasePaths(letterPaths,position){
+const expanded=offsetPaths(clipperUnion(letterPaths),BASE_OFFSET);
+const b=boundsOf(expanded);
+let tabX,tabY;
 
-function pointInside(point,polygon) {
-  let inside=false;
-
-  for(let i=0,j=polygon.length-1;i<polygon.length;j=i++) {
-    const a=polygon[i],b=polygon[j];
-
-    const crosses=
-      ((a.Y>point.Y)!==(b.Y>point.Y)) &&
-      point.X<(b.X-a.X)*(point.Y-a.Y)/(b.Y-a.Y)+a.X;
-
-    if(crosses) inside=!inside;
-  }
-
-  return inside;
+if(position==="top-left"){
+tabX=b.minX/SCALE+3.5;
+tabY=b.maxY/SCALE-2.5;
+}else{
+tabX=b.minX/SCALE+2.5;
+tabY=(b.minY+b.maxY)/(2*SCALE);
 }
 
-function pathToShape(path) {
-  const shape=new THREE.Shape();
+const outerRing=circlePath(tabX,tabY,7.5);
+const joined=clipperUnion([...expanded,outerRing]);
+const hole=circlePath(tabX,tabY,3.1);
+const difference=new ClipperLib.Clipper();
 
-  path.forEach((p,i)=>{
-    const x=p.X/SCALE;
-    const y=p.Y/SCALE;
+difference.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);
+difference.AddPath(hole,ClipperLib.PolyType.ptClip,true);
 
-    if(i===0) shape.moveTo(x,y);
-    else shape.lineTo(x,y);
-  });
-
-  shape.closePath();
-  return shape;
+const finalPaths=new ClipperLib.Paths();
+const success=difference.Execute(ClipperLib.ClipType.ctDifference,finalPaths,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
+if(!success||!finalPaths.length)throw new Error("Could not create the keyring hole.");
+return finalPaths;
 }
 
-function pathsToShapes(paths) {
-  const outers=[];
-  const holes=[];
-
-  paths.forEach(path=>{
-    if(ClipperLib.Clipper.Orientation(path)) {
-      outers.push(path);
-    } else {
-      holes.push(path);
-    }
-  });
-
-  const shapes=outers.map(pathToShape);
-
-  holes.forEach(hole=>{
-    for(let i=0;i<outers.length;i++) {
-      if(pointInside(hole[0],outers[i])) {
-        const holePath=new THREE.Path();
-
-        hole.forEach((p,j)=>{
-          const x=p.X/SCALE;
-          const y=p.Y/SCALE;
-
-          if(j===0) holePath.moveTo(x,y);
-          else holePath.lineTo(x,y);
-        });
-
-        holePath.closePath();
-        shapes[i].holes.push(holePath);
-        break;
-      }
-    }
-  });
-
-  return shapes;
+function pointInside(point,polygon){
+let inside=false;
+for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){
+const a=polygon[i],b=polygon[j];
+const crosses=((a.Y>point.Y)!==(b.Y>point.Y))&&(point.X<(b.X-a.X)*(point.Y-a.Y)/(b.Y-a.Y)+a.X);
+if(crosses)inside=!inside;
+}
+return inside;
 }
 
-function makeBaseMesh(paths,material) {
-  const shapes=pathsToShapes(paths);
-
-  if(!shapes.length) {
-    throw new Error("The base shape is empty.");
-  }
-
-  const geometry=new THREE.ExtrudeGeometry(shapes,{
-    depth:BASE_THICKNESS,
-    bevelEnabled:false,
-    curveSegments:12,
-    steps:1
-  });
-
-  geometry.computeVertexNormals();
-
-  const mesh=new THREE.Mesh(geometry,material);
-  mesh.castShadow=true;
-  mesh.receiveShadow=true;
-
-  return mesh;
+function pathToShape(path){
+const shape=new THREE.Shape();
+path.forEach((p,i)=>{
+const x=p.X/SCALE,y=p.Y/SCALE;
+if(i===0)shape.moveTo(x,y);else shape.lineTo(x,y);
+});
+shape.closePath();
+return shape;
 }
 
-/* RAISED NAME GEOMETRY */
+function pathsToShapes(paths){
+const outers=[],holes=[];
+paths.forEach(path=>{
+if(ClipperLib.Clipper.Orientation(path))outers.push(path);
+else holes.push(path);
+});
+const shapes=outers.map(pathToShape);
 
-function getNameGeometry(text) {
-  const path=font.getPath(text,0,0,100);
-  const pathData=path.toPathData(3);
-
-  const svg=`
-    <svg xmlns="http://www.w3.org/2000/svg"
-         width="1000" height="500"
-         viewBox="-30 -250 1100 500">
-      <path d="${pathData}" fill="black"
-            fill-rule="evenodd"/>
-    </svg>
-  `;
-
-  /*
-    IMPORTANT FIX:
-    SVGLoader.parse() is called on an instance,
-    not directly on THREE.SVGLoader.
-  */
-  const svgLoader=new THREE.SVGLoader();
-  const parsed=svgLoader.parse(svg);
-
-  const shapes=[];
-
-  parsed.paths.forEach(svgPath=>{
-    const newShapes=THREE.SVGLoader.createShapes(svgPath);
-    shapes.push(...newShapes);
-  });
-
-  if(!shapes.length) {
-    throw new Error("The raised name could not be created.");
-  }
-
-  const geometry=new THREE.ExtrudeGeometry(shapes,{
-    depth:NAME_HEIGHT,
-    bevelEnabled:true,
-    bevelSegments:3,
-    steps:1,
-    bevelSize:.12,
-    bevelThickness:.12,
-    curveSegments:16
-  });
-
-  geometry.computeBoundingBox();
-
-  const bounds=geometry.boundingBox;
-  const width=bounds.max.x-bounds.min.x;
-
-  if(!width) throw new Error("The name has no width.");
-
-  const factor=76/width;
-
-  /*
-    Flip the SVG vertical direction so the raised
-    lettering matches the base outline direction.
-  */
-  geometry.scale(factor,-factor,1);
-
-  geometry.computeBoundingBox();
-
-  const centerX=
-    (geometry.boundingBox.min.x+geometry.boundingBox.max.x)/2;
-  const centerY=
-    (geometry.boundingBox.min.y+geometry.boundingBox.max.y)/2;
-
-  geometry.translate(-centerX,-centerY,0);
-  geometry.computeVertexNormals();
-
-  return geometry;
+holes.forEach(hole=>{
+for(let i=0;i<outers.length;i++){
+if(pointInside(hole[0],outers[i])){
+const holePath=new THREE.Path();
+hole.forEach((p,j)=>{
+const x=p.X/SCALE,y=p.Y/SCALE;
+if(j===0)holePath.moveTo(x,y);else holePath.lineTo(x,y);
+});
+holePath.closePath();
+shapes[i].holes.push(holePath);
+break;
+}
+}
+});
+return shapes;
 }
 
-/* REMOVE PREVIOUS MODEL */
-
-function removeOldModel() {
-  [baseMesh,nameMesh].forEach(mesh=>{
-    if(mesh) {
-      scene.remove(mesh);
-      mesh.geometry.dispose();
-      mesh.material.dispose();
-    }
-  });
-
-  baseMesh=null;
-  nameMesh=null;
+function makeBaseMesh(paths,material){
+const shapes=pathsToShapes(paths);
+if(!shapes.length)throw new Error("The base shape is empty.");
+const geometry=new THREE.ExtrudeGeometry(shapes,{depth:BASE_THICKNESS,bevelEnabled:false,curveSegments:12,steps:1});
+geometry.computeVertexNormals();
+const mesh=new THREE.Mesh(geometry,material);
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+return mesh;
 }
 
-/* REBUILD KEYCHAIN */
+function getNameGeometry(text){
+const path=font.getPath(text,0,0,100);
+const pathData=path.toPathData(3);
+const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="-30 -250 1100 500"><path d="${pathData}" fill="black" fill-rule="evenodd"/></svg>`;
 
-function rebuildKeychain() {
-  if(!font||!scene) return;
+const svgLoader=new THREE.SVGLoader();
+const parsed=svgLoader.parse(svg);
+const shapes=[];
 
-  const raw=nameInput.value.trim();
+parsed.paths.forEach(svgPath=>{
+shapes.push(...THREE.SVGLoader.createShapes(svgPath));
+});
 
-  if(!raw) {
-    removeOldModel();
-    loading.textContent="Enter a name to see your keychain.";
-    loading.style.display="block";
-    updatePrice();
-    return;
-  }
+if(!shapes.length)throw new Error("The raised name could not be created.");
 
-  try {
-    removeOldModel();
+const geometry=new THREE.ExtrudeGeometry(shapes,{
+depth:NAME_HEIGHT,
+bevelEnabled:true,
+bevelSegments:3,
+steps:1,
+bevelSize:.12,
+bevelThickness:.12,
+curveSegments:16
+});
 
-    let letterPaths=getContours(raw);
+geometry.computeBoundingBox();
+const bounds=geometry.boundingBox;
+const width=bounds.max.x-bounds.min.x;
+if(!width)throw new Error("The name has no width.");
 
-    if(!letterPaths.length) {
-      throw new Error("No lettering outlines were found.");
-    }
+const factor=76/width;
+geometry.scale(factor,-factor,1);
+geometry.computeBoundingBox();
 
-    letterPaths=scalePaths(letterPaths,76);
-
-    const basePaths=makeBasePaths(
-      letterPaths,
-      attachment.value
-    );
-
-    const baseMaterial=new THREE.MeshStandardMaterial({
-      color:baseColor.hex,
-      roughness:.65,
-      metalness:.02
-    });
-
-    const nameMaterial=new THREE.MeshStandardMaterial({
-      color:nameColor.hex,
-      roughness:.55,
-      metalness:.02,
-      side:THREE.DoubleSide
-    });
-
-    baseMesh=makeBaseMesh(basePaths,baseMaterial);
-
-    const nameGeometry=getNameGeometry(raw);
-
-    nameMesh=new THREE.Mesh(nameGeometry,nameMaterial);
-
-    nameMesh.position.z=BASE_THICKNESS+.04;
-    nameMesh.castShadow=true;
-    nameMesh.receiveShadow=true;
-
-    scene.add(baseMesh);
-    scene.add(nameMesh);
-
-    /* Centre both parts together */
-    const baseBox=new THREE.Box3().setFromObject(baseMesh);
-    const center=baseBox.getCenter(new THREE.Vector3());
-
-    baseMesh.position.x-=center.x;
-    baseMesh.position.y-=center.y;
-
-    nameMesh.position.x-=center.x;
-    nameMesh.position.y-=center.y;
-
-    /* Frame the complete keychain */
-    const completeBox=new THREE.Box3().setFromObject(baseMesh);
-    completeBox.expandByObject(nameMesh);
-
-    const size=completeBox.getSize(new THREE.Vector3());
-    const modelCenter=completeBox.getCenter(new THREE.Vector3());
-    const maxDimension=Math.max(size.x,size.y,size.z);
-
-    camera.position.set(
-      modelCenter.x,
-      modelCenter.y-maxDimension*1.65,
-      modelCenter.z+maxDimension*1.5
-    );
-
-    controls.target.copy(modelCenter);
-    controls.update();
-
-    loading.style.display="none";
-
-  } catch(error) {
-    console.error("Keychain generation error:",error);
-
-    loading.textContent=
-      "Preview error: "+(error.message||"Unknown error");
-
-    loading.style.display="block";
-  }
-
-  updatePrice();
+const centerX=(geometry.boundingBox.min.x+geometry.boundingBox.max.x)/2;
+const centerY=(geometry.boundingBox.min.y+geometry.boundingBox.max.y)/2;
+geometry.translate(-centerX,-centerY,0);
+geometry.computeVertexNormals();
+return geometry;
 }
 
-/* COLOURS */
-
-function updateMaterials() {
-  if(baseMesh) {
-    baseMesh.material.color.set(baseColor.hex);
-  }
-
-  if(nameMesh) {
-    nameMesh.material.color.set(nameColor.hex);
-  }
+function removeOldModel(){
+[baseMesh,nameMesh].forEach(mesh=>{
+if(mesh){
+scene.remove(mesh);
+mesh.geometry.dispose();
+mesh.material.dispose();
+}
+});
+baseMesh=null;
+nameMesh=null;
 }
 
-/* PRICE */
+function rebuildKeychain(){
+if(!font||!scene)return;
+const raw=nameInput.value.trim();
 
-function updatePrice() {
-  const letters=nameInput.value.trim().replace(/\s/g,"").length;
-
-  let price=350;
-  if(letters>=6&&letters<=8) price=450;
-  if(letters>=9) price=550;
-
-  document.getElementById("price").textContent="Rs. "+price;
+if(!raw){
+removeOldModel();
+loading.textContent="Enter a name to see your keychain.";
+loading.style.display="block";
+updatePrice();
+return;
 }
 
-/* INPUT EVENTS */
+try{
+removeOldModel();
 
-function scheduleRebuild() {
-  clearTimeout(rebuildTimer);
-  rebuildTimer=setTimeout(rebuildKeychain,250);
+let letterPaths=getContours(raw);
+if(!letterPaths.length)throw new Error("No lettering outlines were found.");
+letterPaths=scalePaths(letterPaths,76);
+
+const basePaths=makeBasePaths(letterPaths,attachment.value);
+
+const baseMaterial=new THREE.MeshStandardMaterial({color:baseColor.hex,roughness:.65,metalness:.02});
+const nameMaterial=new THREE.MeshStandardMaterial({color:nameColor.hex,roughness:.55,metalness:.02,side:THREE.DoubleSide});
+
+baseMesh=makeBaseMesh(basePaths,baseMaterial);
+const nameGeometry=getNameGeometry(raw);
+nameMesh=new THREE.Mesh(nameGeometry,nameMaterial);
+nameMesh.position.z=BASE_THICKNESS+.04;
+nameMesh.castShadow=true;
+nameMesh.receiveShadow=true;
+
+scene.add(baseMesh);
+scene.add(nameMesh);
+
+const baseBox=new THREE.Box3().setFromObject(baseMesh);
+const center=baseBox.getCenter(new THREE.Vector3());
+baseMesh.position.x-=center.x;
+baseMesh.position.y-=center.y;
+nameMesh.position.x-=center.x;
+nameMesh.position.y-=center.y;
+
+const completeBox=new THREE.Box3().setFromObject(baseMesh);
+completeBox.expandByObject(nameMesh);
+const size=completeBox.getSize(new THREE.Vector3());
+const modelCenter=completeBox.getCenter(new THREE.Vector3());
+const maxDimension=Math.max(size.x,size.y,size.z);
+
+camera.position.set(modelCenter.x,modelCenter.y-maxDimension*1.65,modelCenter.z+maxDimension*1.5);
+controls.target.copy(modelCenter);
+controls.update();
+
+loading.style.display="none";
+
+}catch(error){
+console.error("Keychain generation error:",error);
+loading.textContent="Preview error: "+(error.message||"Unknown error");
+loading.style.display="block";
+}
+updatePrice();
+}
+
+function updateMaterials(){
+if(baseMesh)baseMesh.material.color.set(baseColor.hex);
+if(nameMesh)nameMesh.material.color.set(nameColor.hex);
+}
+
+function updatePrice(){
+const letters=nameInput.value.trim().replace(/\s/g,"").length;
+let price=350;
+if(letters>=6&&letters<=8)price=450;
+if(letters>=9)price=550;
+document.getElementById("price").textContent="Rs. "+price;
+}
+
+function scheduleRebuild(){
+clearTimeout(rebuildTimer);
+rebuildTimer=setTimeout(rebuildKeychain,250);
 }
 
 nameInput.addEventListener("input",()=>{
-  updatePrice();
-  scheduleRebuild();
+updatePrice();
+scheduleRebuild();
 });
-
 attachment.addEventListener("change",scheduleRebuild);
 
-/* WHATSAPP ORDER */
-
 orderButton.addEventListener("click",()=>{
-  const name=nameInput.value.trim();
-  const letters=name.replace(/\s/g,"").length;
+const name=nameInput.value.trim();
+const letters=name.replace(/\s/g,"").length;
+if(!name||!letters){alert("Please enter your name first.");return;}
 
-  if(!name||!letters) {
-    alert("Please enter your name first.");
-    return;
-  }
+let price=350;
+if(letters>=6&&letters<=8)price=450;
+if(letters>=9)price=550;
 
-  let price=350;
-  if(letters>=6&&letters<=8) price=450;
-  if(letters>=9) price=550;
-
-  const position=
-    attachment.value==="top-left"?"Top":"Side";
-
-  const message=
-`Hello She3DPrints! I would like to order a custom name keychain.
+const position=attachment.value==="top-left"?"Top":"Side";
+const message=`Hello She3DPrints! I would like to order a custom name keychain.
 
 Name: ${name}
 Base colour: ${baseColor.name}
@@ -924,53 +524,43 @@ Price: Rs. ${price}
 
 Thank you!`;
 
-  /* PUT YOUR WHATSAPP NUMBER HERE */
-  const phoneNumber="947XXXXXXXX";
+/* REPLACE THIS WITH YOUR WHATSAPP NUMBER */
+const phoneNumber="947XXXXXXXX";
 
-  window.open(
-    "https://wa.me/"+phoneNumber+
-    "?text="+encodeURIComponent(message),
-    "_blank"
-  );
+window.open("https://wa.me/"+phoneNumber+"?text="+encodeURIComponent(message),"_blank");
 });
 
-/* LOAD FONT AND START */
+async function start(){
+try{
+if(!window.THREE)throw new Error("Three.js did not load.");
+if(!THREE.OrbitControls)throw new Error("OrbitControls did not load.");
+if(!THREE.SVGLoader)throw new Error("SVGLoader did not load.");
+if(!window.opentype)throw new Error("OpenType did not load.");
+if(!window.ClipperLib)throw new Error("Clipper did not load.");
 
-async function start() {
-  try {
-    if(!window.THREE) throw new Error("Three.js did not load.");
-    if(!THREE.OrbitControls) throw new Error("OrbitControls did not load.");
-    if(!THREE.SVGLoader) throw new Error("SVGLoader did not load.");
-    if(!window.opentype) throw new Error("OpenType did not load.");
-    if(!window.ClipperLib) throw new Error("Clipper did not load.");
+initThree();
 
-    initThree();
+font=await new Promise((resolve,reject)=>{
+opentype.load(
+"https://raw.githubusercontent.com/google/fonts/main/apache/satisfy/Satisfy-Regular.ttf",
+(error,loadedFont)=>{
+if(error)reject(new Error("Satisfy font could not load from GitHub."));
+else resolve(loadedFont);
+}
+);
+});
 
-    font=await new Promise((resolve,reject)=>{
-      opentype.load(
-        "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/satisfy/Satisfy-Regular.ttf",
-        (error,loadedFont)=>{
-          if(error) reject(new Error("Satisfy font could not load."));
-          else resolve(loadedFont);
-        }
-      );
-    });
+orderButton.disabled=false;
+rebuildKeychain();
 
-    orderButton.disabled=false;
-    rebuildKeychain();
-
-  } catch(error) {
-    console.error("Preview startup error:",error);
-
-    loading.textContent=
-      "Preview loading error: "+(error.message||"Unknown error");
-
-    loading.style.display="block";
-  }
+}catch(error){
+console.error("Preview startup error:",error);
+loading.textContent="Preview loading error: "+(error.message||"Unknown error");
+loading.style.display="block";
+}
 }
 
 start();
 </script>
-
 </body>
 </html>
