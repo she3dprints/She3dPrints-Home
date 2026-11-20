@@ -13,7 +13,7 @@
   --brown:#684332;
   --dark:#30251F;
 }
-* { box-sizing:border-box; }
+* {box-sizing:border-box}
 
 body {
   margin:0;
@@ -21,67 +21,83 @@ body {
   color:var(--dark);
   font-family:Arial,sans-serif;
 }
+
 header {
   padding:22px 16px;
   text-align:center;
   border-bottom:1px solid var(--oat);
 }
+
 header h1 {
   margin:0;
   font-size:25px;
   color:var(--brown);
 }
+
 header p {
   margin:7px 0 0;
   font-size:13px;
 }
+
 .container {
   max-width:1050px;
   margin:auto;
   padding:20px 15px 40px;
 }
+
 .layout {
   display:grid;
-  grid-template-columns:1.15fr 0.85fr;
+  grid-template-columns:1.15fr .85fr;
   gap:25px;
 }
-.preview-box {
+
+.preview-box,
+.panel {
   background:white;
   border:1px solid var(--oat);
   border-radius:16px;
+}
+
+.preview-box {
   overflow:hidden;
 }
+
 #preview {
   width:100%;
   height:420px;
   display:block;
-  touch-action:pan-y;
+  touch-action:none;
 }
+
 .preview-note {
   text-align:center;
   font-size:12px;
   color:#82756D;
   padding:0 10px 15px;
 }
+
 .panel {
-  background:white;
-  border:1px solid var(--oat);
-  border-radius:16px;
   padding:22px;
 }
+
 h2 {
   font-size:20px;
   margin:0 0 20px;
   color:var(--brown);
 }
-.field { margin-bottom:20px; }
+
+.field {
+  margin-bottom:20px;
+}
+
 label {
   display:block;
   font-size:14px;
   font-weight:bold;
   margin-bottom:9px;
 }
-input[type="text"], select {
+
+input[type="text"],select {
   width:100%;
   padding:13px;
   border:1px solid #D9CBC1;
@@ -90,27 +106,31 @@ input[type="text"], select {
   background:white;
   color:var(--dark);
 }
+
 .colors {
   display:flex;
   flex-wrap:wrap;
   gap:12px;
 }
+
 .swatch {
   width:34px;
   height:34px;
   border-radius:50%;
   border:2px solid #ddd;
   cursor:pointer;
-  position:relative;
   padding:0;
 }
+
 .swatch.selected {
   outline:2px solid var(--brown);
   outline-offset:3px;
 }
+
 .swatch.white {
   border:1px solid #aaa;
 }
+
 .price {
   background:var(--milk);
   padding:15px;
@@ -120,10 +140,12 @@ input[type="text"], select {
   align-items:center;
   margin:18px 0;
 }
+
 .price strong {
   font-size:22px;
   color:var(--brown);
 }
+
 .order-button {
   border:0;
   border-radius:10px;
@@ -135,25 +157,34 @@ input[type="text"], select {
   font-weight:bold;
   cursor:pointer;
 }
+
 .order-button:disabled {
   opacity:.5;
-  cursor:not-allowed;
 }
+
 .small {
   font-size:12px;
   color:#82756D;
   line-height:1.5;
 }
+
 .loading {
   text-align:center;
   padding:12px;
   font-size:13px;
   color:var(--brown);
 }
+
 @media(max-width:760px) {
-  .layout { grid-template-columns:1fr; }
-  #preview { height:340px; }
-  .panel { padding:18px; }
+  .layout {
+    grid-template-columns:1fr;
+  }
+  #preview {
+    height:340px;
+  }
+  .panel {
+    padding:18px;
+  }
 }
 </style>
 </head>
@@ -173,7 +204,9 @@ input[type="text"], select {
       <div class="preview-note">
         Drag to rotate · Pinch to zoom
       </div>
-      <div class="loading" id="loading">Preparing 3D preview...</div>
+      <div class="loading" id="loading">
+        Preparing 3D preview...
+      </div>
     </div>
 
     <div class="panel">
@@ -185,10 +218,9 @@ input[type="text"], select {
           type="text"
           id="customerName"
           maxlength="18"
-          value="Ayesha"
+          value="Asma"
           placeholder="Type your name"
-          autocomplete="off"
-        >
+          autocomplete="off">
       </div>
 
       <div class="field">
@@ -232,12 +264,18 @@ input[type="text"], select {
   </div>
 </div>
 
+<!-- 3D libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/SVGLoader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/clipper-lib@6.4.2/clipper.js"></script>
 
 <script>
+/* -------------------------
+   SETTINGS
+------------------------- */
+
 const COLORS = [
   {name:"Light Pink",hex:"#E7A1B5"},
   {name:"Dark Green",hex:"#174C38"},
@@ -247,8 +285,8 @@ const COLORS = [
   {name:"Brown",hex:"#684332"}
 ];
 
-let baseColor = COLORS[0];
-let nameColor = COLORS[3];
+let baseColor = COLORS[1];
+let nameColor = COLORS[0];
 
 let font = null;
 let scene, camera, renderer, controls;
@@ -262,9 +300,15 @@ const attachment = document.getElementById("attachment");
 const orderButton = document.getElementById("orderButton");
 
 const SCALE = 1000;
-const BASE_THICKNESS = 3;
-const NAME_HEIGHT = 2;
+const BASE_THICKNESS = 3.5;
+const NAME_HEIGHT = 2.5;
 const BASE_OFFSET = 3.5;
+
+let rebuildTimer = null;
+
+/* -------------------------
+   COLOUR BUTTONS
+------------------------- */
 
 function makeSwatches(containerId, selected, callback) {
   const container = document.getElementById(containerId);
@@ -272,18 +316,21 @@ function makeSwatches(containerId, selected, callback) {
   COLORS.forEach(color => {
     const swatch = document.createElement("button");
     swatch.type = "button";
-    swatch.className = "swatch" +
+
+    swatch.className =
+      "swatch" +
       (color.hex === "#FFFFFF" ? " white" : "") +
       (color === selected ? " selected" : "");
 
     swatch.style.background = color.hex;
     swatch.title = color.name;
-    swatch.setAttribute("aria-label", color.name);
+    swatch.setAttribute("aria-label",color.name);
 
-    swatch.addEventListener("click", () => {
+    swatch.addEventListener("click",() => {
       container.querySelectorAll(".swatch").forEach(s =>
         s.classList.remove("selected")
       );
+
       swatch.classList.add("selected");
       callback(color);
     });
@@ -292,15 +339,19 @@ function makeSwatches(containerId, selected, callback) {
   });
 }
 
-makeSwatches("baseColors", baseColor, color => {
+makeSwatches("baseColors",baseColor,color => {
   baseColor = color;
   updateMaterials();
 });
 
-makeSwatches("nameColors", nameColor, color => {
+makeSwatches("nameColors",nameColor,color => {
   nameColor = color;
   updateMaterials();
 });
+
+/* -------------------------
+   THREE.JS INITIALISATION
+------------------------- */
 
 function initThree() {
   scene = new THREE.Scene();
@@ -313,34 +364,46 @@ function initThree() {
     1000
   );
 
-  camera.position.set(0, -95, 105);
+  camera.position.set(0,-95,105);
 
   renderer = new THREE.WebGLRenderer({
     antialias:true,
     alpha:false
   });
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(preview.clientWidth, preview.clientHeight);
+  renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio,2)
+  );
+
+  renderer.setSize(
+    preview.clientWidth,
+    preview.clientHeight
+  );
+
+  renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   preview.appendChild(renderer.domElement);
 
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls = new THREE.OrbitControls(
+    camera,
+    renderer.domElement
+  );
+
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
   controls.minDistance = 45;
   controls.maxDistance = 180;
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  scene.add(new THREE.AmbientLight(0xffffff,.85));
 
-  const light = new THREE.DirectionalLight(0xffffff, 1.1);
-  light.position.set(-35, 45, 90);
+  const light = new THREE.DirectionalLight(0xffffff,1.2);
+  light.position.set(-35,45,90);
   scene.add(light);
 
-  const secondLight = new THREE.DirectionalLight(0xffffff, 0.45);
-  secondLight.position.set(45, -35, 40);
+  const secondLight = new THREE.DirectionalLight(0xffffff,.45);
+  secondLight.position.set(45,-35,40);
   scene.add(secondLight);
 
   animate();
@@ -348,8 +411,12 @@ function initThree() {
 
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
+
+  if (controls) controls.update();
+
+  if (renderer && scene && camera) {
+    renderer.render(scene,camera);
+  }
 }
 
 function resizePreview() {
@@ -358,16 +425,90 @@ function resizePreview() {
   const width = preview.clientWidth;
   const height = preview.clientHeight;
 
-  camera.aspect = width / height;
+  camera.aspect = width/height;
   camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
+
+  renderer.setSize(width,height);
 }
 
-window.addEventListener("resize", resizePreview);
+window.addEventListener("resize",resizePreview);
+
+/* -------------------------
+   NAME OUTLINE
+------------------------- */
+
+function getNameShapes(text) {
+  const path = font.getPath(text,0,0,100);
+
+  const pathData = path.toPathData(3);
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="1000" height="400"
+         viewBox="-20 -250 1100 500">
+      <path d="${pathData}"
+            fill="black"
+            fill-rule="evenodd"/>
+    </svg>
+  `;
+
+  const parsed = THREE.SVGLoader.parse(svg);
+  const shapes = [];
+
+  parsed.paths.forEach(path => {
+    const newShapes = THREE.SVGLoader.createShapes(path);
+    shapes.push(...newShapes);
+  });
+
+  if (!shapes.length) {
+    throw new Error("The name outline could not be created.");
+  }
+
+  const geometry = new THREE.ExtrudeGeometry(shapes,{
+    depth:NAME_HEIGHT,
+    bevelEnabled:true,
+    bevelSegments:2,
+    steps:1,
+    bevelSize:.12,
+    bevelThickness:.12,
+    curveSegments:12
+  });
+
+  geometry.computeBoundingBox();
+
+  const bounds = geometry.boundingBox;
+
+  const width = bounds.max.x-bounds.min.x;
+
+  if (!width) throw new Error("Invalid name width.");
+
+  const scale = 76/width;
+
+  geometry.scale(scale,scale,1);
+
+  geometry.computeBoundingBox();
+
+  const centerX =
+    (geometry.boundingBox.min.x+geometry.boundingBox.max.x)/2;
+
+  const centerY =
+    (geometry.boundingBox.min.y+geometry.boundingBox.max.y)/2;
+
+  geometry.translate(-centerX,-centerY,0);
+
+  geometry.computeVertexNormals();
+
+  return geometry;
+}
+
+/* -------------------------
+   BASE OUTLINE
+------------------------- */
 
 function getContours(text) {
-  const path = font.getPath(text, 0, 0, 100);
+  const path = font.getPath(text,0,0,100);
   const commands = path.commands;
+
   const contours = [];
 
   let points = [];
@@ -388,6 +529,7 @@ function getContours(text) {
 
   function quadratic(p0,p1,p2,t) {
     const mt = 1-t;
+
     return {
       x:mt*mt*p0.x+2*mt*t*p1.x+t*t*p2.x,
       y:mt*mt*p0.y+2*mt*t*p1.y+t*t*p2.y
@@ -396,11 +538,13 @@ function getContours(text) {
 
   function cubic(p0,p1,p2,p3,t) {
     const mt = 1-t;
+
     return {
       x:mt*mt*mt*p0.x+
          3*mt*mt*t*p1.x+
          3*mt*t*t*p2.x+
          t*t*t*p3.x,
+
       y:mt*mt*mt*p0.y+
          3*mt*mt*t*p1.y+
          3*mt*t*t*p2.y+
@@ -409,40 +553,48 @@ function getContours(text) {
   }
 
   commands.forEach(cmd => {
-    if (cmd.type === "M") {
+    if (cmd.type==="M") {
       finishContour();
+
       current = {x:cmd.x,y:cmd.y};
       start = {...current};
+
       addPoint(current.x,current.y);
     }
-    else if (cmd.type === "L") {
+
+    else if (cmd.type==="L") {
       current = {x:cmd.x,y:cmd.y};
       addPoint(current.x,current.y);
     }
-    else if (cmd.type === "Q") {
+
+    else if (cmd.type==="Q") {
       const p0 = {...current};
       const p1 = {x:cmd.x1,y:cmd.y1};
       const p2 = {x:cmd.x,y:cmd.y};
 
-      for (let i=1;i<=10;i++) {
-        const p = quadratic(p0,p1,p2,i/10);
+      for (let i=1;i<=12;i++) {
+        const p = quadratic(p0,p1,p2,i/12);
         addPoint(p.x,p.y);
       }
+
       current = p2;
     }
-    else if (cmd.type === "C") {
+
+    else if (cmd.type==="C") {
       const p0 = {...current};
       const p1 = {x:cmd.x1,y:cmd.y1};
       const p2 = {x:cmd.x2,y:cmd.y2};
       const p3 = {x:cmd.x,y:cmd.y};
 
-      for (let i=1;i<=12;i++) {
-        const p = cubic(p0,p1,p2,p3,i/12);
+      for (let i=1;i<=14;i++) {
+        const p = cubic(p0,p1,p2,p3,i/14);
         addPoint(p.x,p.y);
       }
+
       current = p3;
     }
-    else if (cmd.type === "Z") {
+
+    else if (cmd.type==="Z") {
       addPoint(start.x,start.y);
       finishContour();
       current = {...start};
@@ -450,12 +602,13 @@ function getContours(text) {
   });
 
   finishContour();
+
   return contours;
 }
 
 function boundsOf(paths) {
-  let minX=Infinity, maxX=-Infinity;
-  let minY=Infinity, maxY=-Infinity;
+  let minX=Infinity,maxX=-Infinity;
+  let minY=Infinity,maxY=-Infinity;
 
   paths.forEach(path => path.forEach(p => {
     minX=Math.min(minX,p.X);
@@ -467,12 +620,12 @@ function boundsOf(paths) {
   return {minX,maxX,minY,maxY};
 }
 
-function scalePaths(paths, targetWidth) {
+function scalePaths(paths,targetWidth) {
   const b = boundsOf(paths);
-  const width = b.maxX-b.minX;
-  const height = b.maxY-b.minY;
 
-  if (!width || !height) throw new Error("Invalid name outline");
+  const width = b.maxX-b.minX;
+
+  if (!width) throw new Error("Invalid base outline.");
 
   const factor = targetWidth*SCALE/width;
 
@@ -481,6 +634,10 @@ function scalePaths(paths, targetWidth) {
     Y:Math.round((p.Y-(b.minY+b.maxY)/2)*factor)
   })));
 }
+
+/* -------------------------
+   JOIN BASE AND ATTACHMENT
+------------------------- */
 
 function clipperUnion(paths) {
   const clipper = new ClipperLib.Clipper();
@@ -503,8 +660,11 @@ function clipperUnion(paths) {
   return result;
 }
 
-function offsetPaths(paths, amount) {
-  const offset = new ClipperLib.ClipperOffset(2, 0.25*SCALE);
+function offsetPaths(paths,amount) {
+  const offset = new ClipperLib.ClipperOffset(
+    2,
+    .25*SCALE
+  );
 
   offset.AddPaths(
     paths,
@@ -513,26 +673,28 @@ function offsetPaths(paths, amount) {
   );
 
   const result = new ClipperLib.Paths();
-  offset.Execute(result, amount*SCALE);
+
+  offset.Execute(result,amount*SCALE);
 
   return result;
 }
 
-function circlePath(cx,cy,radius,steps=48) {
+function circlePath(cx,cy,radius,steps=64) {
   const path = [];
 
   for (let i=0;i<steps;i++) {
-    const a = Math.PI*2*i/steps;
+    const angle = Math.PI*2*i/steps;
+
     path.push({
-      X:Math.round((cx+Math.cos(a)*radius)*SCALE),
-      Y:Math.round((cy+Math.sin(a)*radius)*SCALE)
+      X:Math.round((cx+Math.cos(angle)*radius)*SCALE),
+      Y:Math.round((cy+Math.sin(angle)*radius)*SCALE)
     });
   }
 
   return path;
 }
 
-function makeBasePaths(letterPaths, position) {
+function makeBasePaths(letterPaths,position) {
   const expanded = offsetPaths(
     clipperUnion(letterPaths),
     BASE_OFFSET
@@ -540,24 +702,33 @@ function makeBasePaths(letterPaths, position) {
 
   const b = boundsOf(expanded);
 
-  let tabX, tabY;
+  let tabX,tabY;
 
-  if (position === "top-left") {
-    tabX = b.minX/SCALE + 5;
-    tabY = b.maxY/SCALE + 3;
+  if (position==="top-left") {
+    /* The attachment overlaps the base deeply */
+    tabX = b.minX/SCALE+3.5;
+    tabY = b.maxY/SCALE-2.5;
   } else {
-    tabX = b.minX/SCALE + 1;
+    /* Side attachment overlaps the left edge */
+    tabX = b.minX/SCALE+2.5;
     tabY = (b.minY+b.maxY)/(2*SCALE);
   }
 
-  const tab = circlePath(tabX,tabY,7.5);
-  const combined = clipperUnion([...expanded,tab]);
+  const attachmentOuter = circlePath(tabX,tabY,7.5);
+
+  /* Union creates one connected base and attachment */
+  const joined = clipperUnion([
+    ...expanded,
+    attachmentOuter
+  ]);
+
+  /* Cut the circular keyring hole from the joined shape */
   const hole = circlePath(tabX,tabY,3.1);
 
   const difference = new ClipperLib.Clipper();
 
   difference.AddPaths(
-    combined,
+    joined,
     ClipperLib.PolyType.ptSubject,
     true
   );
@@ -580,18 +751,29 @@ function makeBasePaths(letterPaths, position) {
   return finalPaths;
 }
 
-function pointInside(point, polygon) {
+/* -------------------------
+   BASE SHAPE WITH HOLE
+------------------------- */
+
+function pointInside(point,polygon) {
   let inside = false;
 
-  for (let i=0,j=polygon.length-1;i<polygon.length;j=i++) {
-    const a = polygon[i];
-    const b = polygon[j];
+  for (
+    let i=0,j=polygon.length-1;
+    i<polygon.length;
+    j=i++
+  ) {
+    const a=polygon[i];
+    const b=polygon[j];
 
     const crosses =
       ((a.Y>point.Y)!==(b.Y>point.Y)) &&
-      (point.X < (b.X-a.X)*(point.Y-a.Y)/(b.Y-a.Y)+a.X);
+      (
+        point.X <
+        (b.X-a.X)*(point.Y-a.Y)/(b.Y-a.Y)+a.X
+      );
 
-    if (crosses) inside = !inside;
+    if (crosses) inside=!inside;
   }
 
   return inside;
@@ -609,12 +791,13 @@ function pathToShape(path) {
   });
 
   shape.closePath();
+
   return shape;
 }
 
 function pathsToShapes(paths) {
-  const outers = [];
-  const holes = [];
+  const outers=[];
+  const holes=[];
 
   paths.forEach(path => {
     if (ClipperLib.Clipper.Orientation(path)) {
@@ -624,14 +807,14 @@ function pathsToShapes(paths) {
     }
   });
 
-  const shapes = outers.map(path => pathToShape(path));
+  const shapes=outers.map(pathToShape);
 
   holes.forEach(hole => {
-    const testPoint = hole[0];
+    const testPoint=hole[0];
 
     for (let i=0;i<outers.length;i++) {
       if (pointInside(testPoint,outers[i])) {
-        const holePath = new THREE.Path();
+        const holePath=new THREE.Path();
 
         hole.forEach((p,j) => {
           const x=p.X/SCALE;
@@ -642,6 +825,7 @@ function pathsToShapes(paths) {
         });
 
         holePath.closePath();
+
         shapes[i].holes.push(holePath);
         break;
       }
@@ -651,25 +835,29 @@ function pathsToShapes(paths) {
   return shapes;
 }
 
-function makeExtrudedMesh(paths, depth, material, zPosition) {
-  const shapes = pathsToShapes(paths);
+function makeBaseMesh(paths,material) {
+  const shapes=pathsToShapes(paths);
 
-  const geometry = new THREE.ExtrudeGeometry(shapes,{
-    depth:depth,
+  const geometry=new THREE.ExtrudeGeometry(shapes,{
+    depth:BASE_THICKNESS,
     bevelEnabled:false,
-    curveSegments:8,
+    curveSegments:12,
     steps:1
   });
 
   geometry.computeVertexNormals();
 
-  const mesh = new THREE.Mesh(geometry,material);
-  mesh.position.z = zPosition;
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
+  const mesh=new THREE.Mesh(geometry,material);
+
+  mesh.castShadow=true;
+  mesh.receiveShadow=true;
 
   return mesh;
 }
+
+/* -------------------------
+   REBUILD KEYCHAIN
+------------------------- */
 
 function removeOldModel() {
   [baseMesh,nameMesh].forEach(mesh => {
@@ -680,21 +868,14 @@ function removeOldModel() {
     }
   });
 
-  baseMesh = null;
-  nameMesh = null;
-}
-
-let rebuildTimer = null;
-
-function scheduleRebuild() {
-  clearTimeout(rebuildTimer);
-  rebuildTimer = setTimeout(rebuildKeychain,180);
+  baseMesh=null;
+  nameMesh=null;
 }
 
 function rebuildKeychain() {
   if (!font || !scene) return;
 
-  const raw = nameInput.value.trim();
+  const raw=nameInput.value.trim();
 
   if (!raw) {
     removeOldModel();
@@ -704,86 +885,131 @@ function rebuildKeychain() {
   try {
     removeOldModel();
 
-    let letterPaths = getContours(raw);
+    let letterPaths=getContours(raw);
 
-    if (!letterPaths.length) return;
+    if (!letterPaths.length) {
+      throw new Error("No lettering was created.");
+    }
 
-    letterPaths = scalePaths(letterPaths,76);
+    letterPaths=scalePaths(letterPaths,76);
 
-    const basePaths = makeBasePaths(
+    const basePaths=makeBasePaths(
       letterPaths,
       attachment.value
     );
 
-    const baseMaterial = new THREE.MeshStandardMaterial({
+    const baseMaterial=new THREE.MeshStandardMaterial({
       color:baseColor.hex,
-      roughness:0.68,
-      metalness:0.02
+      roughness:.65,
+      metalness:.02
     });
 
-    const nameMaterial = new THREE.MeshStandardMaterial({
+    const nameMaterial=new THREE.MeshStandardMaterial({
       color:nameColor.hex,
-      roughness:0.58,
-      metalness:0.02
+      roughness:.55,
+      metalness:.02,
+      side:THREE.DoubleSide
     });
 
-    baseMesh = makeExtrudedMesh(
-      basePaths,
-      BASE_THICKNESS,
-      baseMaterial,
-      0
+    baseMesh=makeBaseMesh(basePaths,baseMaterial);
+
+    /* Generate the customer's actual name */
+    const nameGeometry=getNameShapes(raw);
+
+    nameMesh=new THREE.Mesh(
+      nameGeometry,
+      nameMaterial
     );
 
-    nameMesh = makeExtrudedMesh(
-      letterPaths,
-      NAME_HEIGHT,
-      nameMaterial,
-      BASE_THICKNESS
-    );
+    /* Place the name directly on top of the base */
+    nameMesh.position.z=BASE_THICKNESS+.03;
+
+    nameMesh.castShadow=true;
+    nameMesh.receiveShadow=true;
 
     scene.add(baseMesh);
     scene.add(nameMesh);
 
-    const box = new THREE.Box3().setFromObject(baseMesh);
-    const center = box.getCenter(new THREE.Vector3());
+    /* Centre the complete model */
+    const box=new THREE.Box3().setFromObject(baseMesh);
+    const center=box.getCenter(new THREE.Vector3());
 
-    baseMesh.position.x -= center.x;
-    baseMesh.position.y -= center.y;
+    baseMesh.position.x-=center.x;
+    baseMesh.position.y-=center.y;
 
-    nameMesh.position.x -= center.x;
-    nameMesh.position.y -= center.y;
+    nameMesh.position.x-=center.x;
+    nameMesh.position.y-=center.y;
 
-    camera.position.set(0,-95,105);
-    controls.target.set(0,0,1);
+    /* Fit camera to the complete model */
+    const completeBox=new THREE.Box3().setFromObject(baseMesh);
+    completeBox.expandByObject(nameMesh);
+
+    const size=completeBox.getSize(new THREE.Vector3());
+    const modelCenter=completeBox.getCenter(new THREE.Vector3());
+
+    const maxDimension=Math.max(size.x,size.y,size.z);
+
+    camera.position.set(
+      modelCenter.x,
+      modelCenter.y-maxDimension*1.5,
+      modelCenter.z+maxDimension*1.35
+    );
+
+    controls.target.copy(modelCenter);
     controls.update();
 
     loading.style.display="none";
 
   } catch(error) {
-    console.error(error);
-    loading.textContent =
-      "Could not create this name. Please try another spelling.";
+    console.error("Keychain generation error:",error);
+
+    loading.textContent=
+      "Could not generate this keychain. Please try again.";
+
     loading.style.display="block";
   }
 
   updatePrice();
 }
 
+/* -------------------------
+   UPDATE COLOURS
+------------------------- */
+
 function updateMaterials() {
-  if (baseMesh) baseMesh.material.color.set(baseColor.hex);
-  if (nameMesh) nameMesh.material.color.set(nameColor.hex);
+  if (baseMesh) {
+    baseMesh.material.color.set(baseColor.hex);
+  }
+
+  if (nameMesh) {
+    nameMesh.material.color.set(nameColor.hex);
+  }
 }
 
+/* -------------------------
+   PRICE
+------------------------- */
+
 function updatePrice() {
-  const letters = nameInput.value.trim().replace(/\s/g,"").length;
+  const letters=nameInput.value.trim().replace(/\s/g,"").length;
 
-  let price = 350;
+  let price=350;
 
-  if (letters >= 6 && letters <= 8) price = 450;
-  if (letters >= 9) price = 550;
+  if (letters>=6 && letters<=8) price=450;
+  if (letters>=9) price=550;
 
-  document.getElementById("price").textContent =
-    "Rs. " + price;
+  document.getElementById("price").textContent=
+    "Rs. "+price;
+}
+
+/* -------------------------
+   INPUT EVENTS
+------------------------- */
+
+function scheduleRebuild() {
+  clearTimeout(rebuildTimer);
+
+  rebuildTimer=setTimeout(rebuildKeychain,200);
 }
 
 nameInput.addEventListener("input",() => {
@@ -793,24 +1019,28 @@ nameInput.addEventListener("input",() => {
 
 attachment.addEventListener("change",scheduleRebuild);
 
+/* -------------------------
+   WHATSAPP ORDER
+------------------------- */
+
 orderButton.addEventListener("click",() => {
-  const name = nameInput.value.trim();
-  const letters = name.replace(/\s/g,"").length;
+  const name=nameInput.value.trim();
+  const letters=name.replace(/\s/g,"").length;
 
   if (!name || !letters) {
     alert("Please enter your name first.");
     return;
   }
 
-  let price = 350;
-  if (letters >= 6 && letters <= 8) price = 450;
-  if (letters >= 9) price = 550;
+  let price=350;
 
-  const position = attachment.value === "top-left"
-    ? "Top"
-    : "Side";
+  if (letters>=6 && letters<=8) price=450;
+  if (letters>=9) price=550;
 
-  const message =
+  const position=
+    attachment.value==="top-left" ? "Top" : "Side";
+
+  const message=
 `Hello She3DPrints! I would like to order a custom name keychain.
 
 Name: ${name}
@@ -821,20 +1051,35 @@ Price: Rs. ${price}
 
 Thank you!`;
 
-  const phoneNumber = "947XXXXXXXX";
+  /* REPLACE WITH YOUR WHATSAPP NUMBER */
+  const phoneNumber="94777224525";
 
   window.open(
-    "https://wa.me/" + phoneNumber +
-    "?text=" + encodeURIComponent(message),
+    "https://wa.me/"+phoneNumber+
+    "?text="+encodeURIComponent(message),
     "_blank"
   );
 });
 
+/* -------------------------
+   LOAD FONT AND START
+------------------------- */
+
 async function start() {
   try {
+    if (
+      !window.THREE ||
+      !THREE.OrbitControls ||
+      !THREE.SVGLoader ||
+      !window.opentype ||
+      !window.ClipperLib
+    ) {
+      throw new Error("A required 3D library did not load.");
+    }
+
     initThree();
 
-    font = await new Promise((resolve,reject) => {
+    font=await new Promise((resolve,reject) => {
       opentype.load(
         "https://cdn.jsdelivr.net/gh/google/fonts@main/apache/satisfy/Satisfy-Regular.ttf",
         (error,loadedFont) => {
@@ -844,13 +1089,16 @@ async function start() {
       );
     });
 
-    orderButton.disabled = false;
+    orderButton.disabled=false;
+
     rebuildKeychain();
 
   } catch(error) {
-    console.error("3D preview error:",error);
-    loading.textContent =
-      "The 3D preview could not load. Please try again later.";
+    console.error("Preview startup error:",error);
+
+    loading.textContent=
+      "3D preview could not load. Please check the internet connection and reload.";
+
     loading.style.display="block";
   }
 }
