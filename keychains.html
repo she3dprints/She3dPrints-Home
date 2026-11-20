@@ -95,74 +95,87 @@ function getContours(text){
  });finish();return contours;
 }
 function boundsOf(paths){let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;paths.forEach(p=>p.forEach(q=>{minX=Math.min(minX,q.X);maxX=Math.max(maxX,q.X);minY=Math.min(minY,q.Y);maxY=Math.max(maxY,q.Y);}));return{minX,maxX,minY,maxY};}
-function scalePaths(paths,targetWidth){const b=boundsOf(paths),w=b.maxX-b.minX;if(!w)throw new Error('Invalid base outline.');const f=targetWidth*SCALE/w;return paths.map(p=>p.map(q=>({X:Math.round((q.X-(b.minX+b.maxX)/2)*f),Y:Math.round((q.Y-(b.minY+b.maxY)/2)*f)})));}
+function scalePaths(paths,maxWidth,maxHeight){
+ const b=boundsOf(paths);
+ const w=b.maxX-b.minX;
+ const h=b.maxY-b.minY;
+ if(!w||!h)throw new Error('Invalid name outline.');
+ // Keep the lettering at a consistent height while preserving the font's
+ // natural proportions. Short names stay short; long names fit the width.
+ const factor=Math.min((maxHeight*SCALE)/h,(maxWidth*SCALE)/w);
+ return paths.map(path=>path.map(q=>({
+  X:Math.round((q.X-(b.minX+b.maxX)/2)*factor),
+  Y:Math.round((q.Y-(b.minY+b.maxY)/2)*factor)
+ })));
+}
 function clipperUnion(paths){const c=new ClipperLib.Clipper();c.AddPaths(paths,ClipperLib.PolyType.ptSubject,true);const out=new ClipperLib.Paths();c.Execute(ClipperLib.ClipType.ctUnion,out,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);return out;}
 function offsetPaths(paths,amount){const o=new ClipperLib.ClipperOffset(2,.25*SCALE);o.AddPaths(paths,ClipperLib.JoinType.jtRound,ClipperLib.EndType.etClosedPolygon);const out=new ClipperLib.Paths();o.Execute(out,amount*SCALE);return out;}
 function circlePath(cx,cy,r,steps=72){const p=[];for(let i=0;i<steps;i++){const a=2*Math.PI*i/steps;p.push({X:Math.round((cx+Math.cos(a)*r)*SCALE),Y:Math.round((cy+Math.sin(a)*r)*SCALE)});}return p;}
 function makeBasePaths(letterPaths,position){
+ // A rounded, continuous backing follows the complete name outline.
  const expanded=offsetPaths(clipperUnion(letterPaths),BASE_OFFSET);
  const b=boundsOf(expanded);
-
- let x,y,outerRing,joined;
+ let x,y;
 
  if(position==='top-left'){
-
-  // Position the ring above the top-left area of the actual name.
-  x=b.minX/SCALE+8;
-  y=b.maxY/SCALE+7.5;
-
-  outerRing=circlePath(x,y,7.5);
-
-  // Find the nearest point on the actual name backing.
+  // Find a real point on the upper-left part of the backing outline.
+  const targetX=b.minX/SCALE+8;
+  const targetY=b.maxY/SCALE-3;
   let nearest=null;
   let bestDistance=Infinity;
 
   expanded.forEach(path=>{
    for(let i=0;i<path.length;i++){
-    const a=path[i];
-    const c=path[(i+1)%path.length];
-
-    const ax=a.X/SCALE;
-    const ay=a.Y/SCALE;
-    const cx=c.X/SCALE;
-    const cy=c.Y/SCALE;
-
-    const vx=cx-ax;
-    const vy=cy-ay;
+    const a=path[i],c=path[(i+1)%path.length];
+    const ax=a.X/SCALE, ay=a.Y/SCALE;
+    const cx=c.X/SCALE, cy=c.Y/SCALE;
+    const vx=cx-ax, vy=cy-ay;
     const length2=vx*vx+vy*vy;
-
-    let t=length2===0?0:
-     ((x-ax)*vx+(y-ay)*vy)/length2;
-
+    let t=length2===0?0:((targetX-ax)*vx+(targetY-ay)*vy)/length2;
     t=Math.max(0,Math.min(1,t));
-
-    const px=ax+t*vx;
-    const py=ay+t*vy;
-    const dx=px-x;
-    const dy=py-y;
+    const px=ax+t*vx, py=ay+t*vy;
+    const dx=px-targetX, dy=py-targetY;
     const distance=dx*dx+dy*dy;
-
-    if(distance<bestDistance){
-     bestDistance=distance;
-     nearest={x:px,y:py};
-    }
+    if(distance<bestDistance){bestDistance=distance;nearest={x:px,y:py};}
    }
   });
+  if(!nearest)throw new Error('Could not position the keyring.');
 
-  if(!nearest) throw new Error('Could not position the keyring.');
+  // Move the circle outward just enough for its own edge to overlap
+  // the backing. There is deliberately NO connector or neck.
+  const centerX=(b.minX+b.maxX)/(2*SCALE);
+  const centerY=(b.minY+b.maxY)/(2*SCALE);
+  let dx=nearest.x-centerX,dy=nearest.y-centerY;
+  const length=Math.sqrt(dx*dx+dy*dy);
+  if(length<0.01)throw new Error('Could not position the keyring.');
+  dx/=length;dy/=length;
+  const overlap=4.5;
+  x=nearest.x+dx*overlap;
+  y=nearest.y+dy*overlap;
+ }else{
+  // Side option: circle directly overlaps the left edge of the backing.
+  x=b.minX/SCALE+5.5;
+  y=(b.minY+b.maxY)/(2*SCALE);
+ }
 
-  // Make a small solid bridge from the outside of the ring
-
-
-;
-
+ // Fuse the circle itself with the backing, then cut its centre hole.
+ const outerRing=circlePath(x,y,7.5);
+ const joined=clipperUnion([...expanded,outerRing]);
+ const diff=new ClipperLib.Clipper();
+ diff.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);
+ diff.AddPath(circlePath(x,y,3.1),ClipperLib.PolyType.ptClip,true);
+ const result=new ClipperLib.Paths();
+ diff.Execute(ClipperLib.ClipType.ctDifference,result,
+  ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
+ return result;
+}
 function pointInside(pt,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if(((a.Y>pt.Y)!==(b.Y>pt.Y))&&(pt.X<(b.X-a.X)*(pt.Y-a.Y)/(b.Y-a.Y)+a.X))inside=!inside;}return inside;}
 function pathToShape(path){const s=new THREE.Shape();path.forEach((p,i)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(i===0)s.moveTo(x,y);else s.lineTo(x,y);});s.closePath();return s;}
 function pathsToShapes(paths){const outers=[],holes=[];paths.forEach(p=>{if(ClipperLib.Clipper.Orientation(p))outers.push(p);else holes.push(p);});const shapes=outers.map(pathToShape);holes.forEach(h=>{for(let i=0;i<outers.length;i++){if(pointInside(h[0],outers[i])){const hp=new THREE.Path();h.forEach((p,j)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(j===0)hp.moveTo(x,y);else hp.lineTo(x,y);});hp.closePath();shapes[i].holes.push(hp);break;}}});return shapes;}
 function makeBaseMesh(paths){const geometry=new THREE.ExtrudeGeometry(pathsToShapes(paths),{depth:BASE_THICKNESS,bevelEnabled:false,curveSegments:16,steps:1});geometry.computeVertexNormals();const material=new THREE.MeshStandardMaterial({color:baseColor.hex,roughness:.72,metalness:0});const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=true;mesh.receiveShadow=true;return mesh;}
 function removeOldModel(){[baseMesh,nameMesh].forEach(m=>{if(m){scene.remove(m);m.geometry.dispose();if(Array.isArray(m.material)){[...new Set(m.material)].forEach(mat=>mat.dispose());}else if(m.material)m.material.dispose();}});baseMesh=null;nameMesh=null;}
 function rebuildKeychain(){if(!font||!scene)return;const raw=nameInput.value.trim();if(!raw){removeOldModel();loading.textContent='Type a name to see your keychain.';loading.style.display='block';updatePrice();return;}
- try{removeOldModel();let contours=scalePaths(getContours(raw),76);const basePaths=makeBasePaths(contours,attachment.value);baseMesh=makeBaseMesh(basePaths);const ng=getNameGeometry(contours);const nm=new THREE.MeshBasicMaterial({color:nameColor.hex,side:THREE.DoubleSide});nameMesh=new THREE.Mesh(ng,nm);nameMesh.position.z=BASE_THICKNESS+.12;nameMesh.castShadow=true;nameMesh.receiveShadow=true;scene.add(baseMesh);scene.add(nameMesh);
+ try{removeOldModel();let contours=scalePaths(getContours(raw),76,25);const basePaths=makeBasePaths(contours,attachment.value);baseMesh=makeBaseMesh(basePaths);const ng=getNameGeometry(contours);const nm=new THREE.MeshBasicMaterial({color:nameColor.hex,side:THREE.DoubleSide});nameMesh=new THREE.Mesh(ng,nm);nameMesh.position.z=BASE_THICKNESS+.12;nameMesh.castShadow=true;nameMesh.receiveShadow=true;scene.add(baseMesh);scene.add(nameMesh);
   const bb=new THREE.Box3().setFromObject(baseMesh),center=bb.getCenter(new THREE.Vector3());baseMesh.position.x-=center.x;baseMesh.position.y-=center.y;nameMesh.position.x-=center.x;nameMesh.position.y-=center.y;
   const full=new THREE.Box3().setFromObject(baseMesh);full.expandByObject(nameMesh);const size=full.getSize(new THREE.Vector3()),mid=full.getCenter(new THREE.Vector3()),max=Math.max(size.x,size.y,size.z);camera.position.set(mid.x,mid.y-max*1.65,mid.z+max*1.5);controls.target.copy(mid);controls.update();loading.textContent='';loading.style.display='none';
  }catch(e){console.error('Keychain generation error:',e);loading.textContent='Could not generate this keychain: '+(e&&e.message?e.message:'Please try again.');loading.style.display='block';}
