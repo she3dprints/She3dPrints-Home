@@ -99,29 +99,120 @@ function scalePaths(paths,targetWidth){const b=boundsOf(paths),w=b.maxX-b.minX;i
 function clipperUnion(paths){const c=new ClipperLib.Clipper();c.AddPaths(paths,ClipperLib.PolyType.ptSubject,true);const out=new ClipperLib.Paths();c.Execute(ClipperLib.ClipType.ctUnion,out,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);return out;}
 function offsetPaths(paths,amount){const o=new ClipperLib.ClipperOffset(2,.25*SCALE);o.AddPaths(paths,ClipperLib.JoinType.jtRound,ClipperLib.EndType.etClosedPolygon);const out=new ClipperLib.Paths();o.Execute(out,amount*SCALE);return out;}
 function circlePath(cx,cy,r,steps=72){const p=[];for(let i=0;i<steps;i++){const a=2*Math.PI*i/steps;p.push({X:Math.round((cx+Math.cos(a)*r)*SCALE),Y:Math.round((cy+Math.sin(a)*r)*SCALE)});}return p;}
+
 function makeBasePaths(letterPaths,position){
- const expanded=offsetPaths(clipperUnion(letterPaths),BASE_OFFSET),b=boundsOf(expanded);
- let x,y;
+ const expanded=offsetPaths(clipperUnion(letterPaths),BASE_OFFSET);
+ const b=boundsOf(expanded);
+
+ let x,y,outerRing,joined;
+
  if(position==='top-left'){
-  /* TOP option: overlap the round loop directly with the top-left
-     outline of the name backing. A direct union avoids the thin straight
-     connector/neck that looked like a separate line. */
-  x=b.minX/SCALE+15;
-  y=b.maxY/SCALE+4.2;
+
+  // Position the ring above the top-left area of the actual name.
+  x=b.minX/SCALE+8;
+  y=b.maxY/SCALE+7.5;
+
+  outerRing=circlePath(x,y,7.5);
+
+  // Find the nearest point on the actual name backing.
+  let nearest=null;
+  let bestDistance=Infinity;
+
+  expanded.forEach(path=>{
+   for(let i=0;i<path.length;i++){
+    const a=path[i];
+    const c=path[(i+1)%path.length];
+
+    const ax=a.X/SCALE;
+    const ay=a.Y/SCALE;
+    const cx=c.X/SCALE;
+    const cy=c.Y/SCALE;
+
+    const vx=cx-ax;
+    const vy=cy-ay;
+    const length2=vx*vx+vy*vy;
+
+    let t=length2===0?0:
+     ((x-ax)*vx+(y-ay)*vy)/length2;
+
+    t=Math.max(0,Math.min(1,t));
+
+    const px=ax+t*vx;
+    const py=ay+t*vy;
+    const dx=px-x;
+    const dy=py-y;
+    const distance=dx*dx+dy*dy;
+
+    if(distance<bestDistance){
+     bestDistance=distance;
+     nearest={x:px,y:py};
+    }
+   }
+  });
+
+  if(!nearest) throw new Error('Could not position the keyring.');
+
+  // Make a small solid bridge from the outside of the ring
+  // to the nearest point on the name backing.
+  const dx=nearest.x-x;
+  const dy=nearest.y-y;
+  const distance=Math.sqrt(dx*dx+dy*dy);
+
+  if(distance<0.01) throw new Error('Could not connect the keyring.');
+
+  const ux=dx/distance;
+  const uy=dy/distance;
+
+  const startDistance=6.2;
+  const endDistance=distance+2.2;
+  const halfWidth=1.8;
+
+  const sx=x+ux*startDistance;
+  const sy=y+uy*startDistance;
+  const ex=x+ux*endDistance;
+  const ey=y+uy*endDistance;
+
+  const px=-uy*halfWidth;
+  const py=ux*halfWidth;
+
+  const connector=[[
+   {X:Math.round((sx+px)*SCALE),Y:Math.round((sy+py)*SCALE)},
+   {X:Math.round((ex+px)*SCALE),Y:Math.round((ey+py)*SCALE)},
+   {X:Math.round((ex-px)*SCALE),Y:Math.round((ey-py)*SCALE)},
+   {X:Math.round((sx-px)*SCALE),Y:Math.round((sy-py)*SCALE)}
+  ]];
+
+  // Join the name, connector and ring into one continuous base.
+  joined=clipperUnion([...expanded,...connector,outerRing]);
+
  } else {
-  /* SIDE option stays attached to the left edge. */
+
+  // Keep the existing side attachment behaviour.
   x=b.minX/SCALE+5.5;
   y=(b.minY+b.maxY)/(2*SCALE);
+
+  outerRing=circlePath(x,y,7.5);
+  joined=clipperUnion([...expanded,outerRing]);
  }
- const outerRing=circlePath(x,y,7.5);
- /* The ring overlaps the backing and is fused into one continuous outline. */
- const joined=clipperUnion([...expanded,outerRing]);
- const diff=new ClipperLib.Clipper();diff.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);
+
+ // Cut the hole out of the ring without closing it.
+ const diff=new ClipperLib.Clipper();
+ diff.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);
  diff.AddPath(circlePath(x,y,3.1),ClipperLib.PolyType.ptClip,true);
+
  const result=new ClipperLib.Paths();
- diff.Execute(ClipperLib.ClipType.ctDifference,result,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);
+
+ diff.Execute(
+  ClipperLib.ClipType.ctDifference,
+  result,
+  ClipperLib.PolyFillType.pftNonZero,
+  ClipperLib.PolyFillType.pftNonZero
+ );
+
  return result;
 }
+;
+
 function pointInside(pt,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if(((a.Y>pt.Y)!==(b.Y>pt.Y))&&(pt.X<(b.X-a.X)*(pt.Y-a.Y)/(b.Y-a.Y)+a.X))inside=!inside;}return inside;}
 function pathToShape(path){const s=new THREE.Shape();path.forEach((p,i)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(i===0)s.moveTo(x,y);else s.lineTo(x,y);});s.closePath();return s;}
 function pathsToShapes(paths){const outers=[],holes=[];paths.forEach(p=>{if(ClipperLib.Clipper.Orientation(p))outers.push(p);else holes.push(p);});const shapes=outers.map(pathToShape);holes.forEach(h=>{for(let i=0;i<outers.length;i++){if(pointInside(h[0],outers[i])){const hp=new THREE.Path();h.forEach((p,j)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(j===0)hp.moveTo(x,y);else hp.lineTo(x,y);});hp.closePath();shapes[i].holes.push(hp);break;}}});return shapes;}
