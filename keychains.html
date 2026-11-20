@@ -99,7 +99,6 @@ function scalePaths(paths,targetWidth){const b=boundsOf(paths),w=b.maxX-b.minX;i
 function clipperUnion(paths){const c=new ClipperLib.Clipper();c.AddPaths(paths,ClipperLib.PolyType.ptSubject,true);const out=new ClipperLib.Paths();c.Execute(ClipperLib.ClipType.ctUnion,out,ClipperLib.PolyFillType.pftNonZero,ClipperLib.PolyFillType.pftNonZero);return out;}
 function offsetPaths(paths,amount){const o=new ClipperLib.ClipperOffset(2,.25*SCALE);o.AddPaths(paths,ClipperLib.JoinType.jtRound,ClipperLib.EndType.etClosedPolygon);const out=new ClipperLib.Paths();o.Execute(out,amount*SCALE);return out;}
 function circlePath(cx,cy,r,steps=72){const p=[];for(let i=0;i<steps;i++){const a=2*Math.PI*i/steps;p.push({X:Math.round((cx+Math.cos(a)*r)*SCALE),Y:Math.round((cy+Math.sin(a)*r)*SCALE)});}return p;}
-
 function makeBasePaths(letterPaths,position){
  const expanded=offsetPaths(clipperUnion(letterPaths),BASE_OFFSET);
  const b=boundsOf(expanded);
@@ -153,64 +152,8 @@ function makeBasePaths(letterPaths,position){
   if(!nearest) throw new Error('Could not position the keyring.');
 
   // Make a small solid bridge from the outside of the ring
-  // to the nearest point on the name backing.
-  const dx=nearest.x-x;
-  const dy=nearest.y-y;
-  const distance=Math.sqrt(dx*dx+dy*dy);
 
-  if(distance<0.01) throw new Error('Could not connect the keyring.');
 
-  const ux=dx/distance;
-  const uy=dy/distance;
-
-  const startDistance=6.2;
-  const endDistance=distance+2.2;
-  const halfWidth=1.8;
-
-  const sx=x+ux*startDistance;
-  const sy=y+uy*startDistance;
-  const ex=x+ux*endDistance;
-  const ey=y+uy*endDistance;
-
-  const px=-uy*halfWidth;
-  const py=ux*halfWidth;
-
-  const connector=[[
-   {X:Math.round((sx+px)*SCALE),Y:Math.round((sy+py)*SCALE)},
-   {X:Math.round((ex+px)*SCALE),Y:Math.round((ey+py)*SCALE)},
-   {X:Math.round((ex-px)*SCALE),Y:Math.round((ey-py)*SCALE)},
-   {X:Math.round((sx-px)*SCALE),Y:Math.round((sy-py)*SCALE)}
-  ]];
-
-  // Join the name, connector and ring into one continuous base.
-  joined=clipperUnion([...expanded,...connector,outerRing]);
-
- } else {
-
-  // Keep the existing side attachment behaviour.
-  x=b.minX/SCALE+5.5;
-  y=(b.minY+b.maxY)/(2*SCALE);
-
-  outerRing=circlePath(x,y,7.5);
-  joined=clipperUnion([...expanded,outerRing]);
- }
-
- // Cut the hole out of the ring without closing it.
- const diff=new ClipperLib.Clipper();
- diff.AddPaths(joined,ClipperLib.PolyType.ptSubject,true);
- diff.AddPath(circlePath(x,y,3.1),ClipperLib.PolyType.ptClip,true);
-
- const result=new ClipperLib.Paths();
-
- diff.Execute(
-  ClipperLib.ClipType.ctDifference,
-  result,
-  ClipperLib.PolyFillType.pftNonZero,
-  ClipperLib.PolyFillType.pftNonZero
- );
-
- return result;
-}
 ;
 
 function pointInside(pt,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if(((a.Y>pt.Y)!==(b.Y>pt.Y))&&(pt.X<(b.X-a.X)*(pt.Y-a.Y)/(b.Y-a.Y)+a.X))inside=!inside;}return inside;}
