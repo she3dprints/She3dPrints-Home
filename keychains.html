@@ -39,7 +39,7 @@ input[type=text],select{width:100%;padding:13px;border:1px solid #D9CBC1;border-
 'use strict';
 const COLORS=[
  {name:'Light Pink',hex:'#F28EAE'},
- {name:'Dark Green',hex:'#087A55'},
+ {name:'Dark Green',hex:'#174C38'},
  {name:'Matcha Green',hex:'#B6C98B'},
  {name:'Black',hex:'#222222'},
  {name:'White',hex:'#FFFFFF'},
@@ -59,7 +59,7 @@ function initThree(){
  camera=new THREE.PerspectiveCamera(38,Math.max(1,preview.clientWidth)/Math.max(1,preview.clientHeight),.1,1000);camera.position.set(0,-95,105);
  renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(preview.clientWidth,preview.clientHeight);renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;preview.appendChild(renderer.domElement);
  controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.07;controls.minDistance=45;controls.maxDistance=180;
- scene.add(new THREE.AmbientLight(0xffffff,.9));const l1=new THREE.DirectionalLight(0xffffff,1.25);l1.position.set(-35,45,90);scene.add(l1);const l2=new THREE.DirectionalLight(0xffffff,.55);l2.position.set(45,-35,40);scene.add(l2);animate();
+ scene.add(new THREE.AmbientLight(0xffffff,.65));const l1=new THREE.DirectionalLight(0xffffff,.7);l1.position.set(-35,45,90);scene.add(l1);const l2=new THREE.DirectionalLight(0xffffff,.22);l2.position.set(45,-35,40);scene.add(l2);renderer.toneMapping=THREE.NoToneMapping;renderer.toneMappingExposure=1;animate();
 }
 function animate(){requestAnimationFrame(animate);if(controls)controls.update();if(renderer&&scene&&camera)renderer.render(scene,camera);}
 function resizePreview(){if(!renderer)return;const w=preview.clientWidth,h=preview.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}
@@ -68,7 +68,13 @@ window.addEventListener('resize',resizePreview);
 /* Raised name is built from the exact same outlines as the base. This keeps
    the lettering registered directly over its base and avoids SVG font parsing. */
 function getNameGeometry(letterPaths){
- const geometry=new THREE.ExtrudeGeometry(pathsToShapes(letterPaths),{
+ /* Normalize outline winding first. Font glyph contours can arrive with
+    opposite winding, which otherwise makes the raised letters disappear. */
+ const normalizedPaths=clipperUnion(letterPaths);
+ if(!normalizedPaths.length)throw new Error('Could not create the raised lettering outline.');
+ const nameShapes=pathsToShapes(normalizedPaths);
+ if(!nameShapes.length)throw new Error('Raised lettering shapes are empty.');
+ const geometry=new THREE.ExtrudeGeometry(nameShapes,{
   depth:NAME_HEIGHT,bevelEnabled:true,bevelSegments:3,steps:1,
   bevelSize:.12,bevelThickness:.12,curveSegments:16
  });
@@ -123,10 +129,10 @@ function makeBasePaths(letterPaths,position){
 function pointInside(pt,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if(((a.Y>pt.Y)!==(b.Y>pt.Y))&&(pt.X<(b.X-a.X)*(pt.Y-a.Y)/(b.Y-a.Y)+a.X))inside=!inside;}return inside;}
 function pathToShape(path){const s=new THREE.Shape();path.forEach((p,i)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(i===0)s.moveTo(x,y);else s.lineTo(x,y);});s.closePath();return s;}
 function pathsToShapes(paths){const outers=[],holes=[];paths.forEach(p=>{if(ClipperLib.Clipper.Orientation(p))outers.push(p);else holes.push(p);});const shapes=outers.map(pathToShape);holes.forEach(h=>{for(let i=0;i<outers.length;i++){if(pointInside(h[0],outers[i])){const hp=new THREE.Path();h.forEach((p,j)=>{const x=p.X/SCALE,y=p.Y/SCALE;if(j===0)hp.moveTo(x,y);else hp.lineTo(x,y);});hp.closePath();shapes[i].holes.push(hp);break;}}});return shapes;}
-function makeBaseMesh(paths){const geometry=new THREE.ExtrudeGeometry(pathsToShapes(paths),{depth:BASE_THICKNESS,bevelEnabled:false,curveSegments:16,steps:1});geometry.computeVertexNormals();const material=new THREE.MeshStandardMaterial({color:baseColor.hex,roughness:.58,metalness:.01});const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=true;mesh.receiveShadow=true;return mesh;}
+function makeBaseMesh(paths){const geometry=new THREE.ExtrudeGeometry(pathsToShapes(paths),{depth:BASE_THICKNESS,bevelEnabled:false,curveSegments:16,steps:1});geometry.computeVertexNormals();const material=new THREE.MeshStandardMaterial({color:baseColor.hex,roughness:.72,metalness:0});const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=true;mesh.receiveShadow=true;return mesh;}
 function removeOldModel(){[baseMesh,nameMesh].forEach(m=>{if(m){scene.remove(m);m.geometry.dispose();if(Array.isArray(m.material)){[...new Set(m.material)].forEach(mat=>mat.dispose());}else if(m.material)m.material.dispose();}});baseMesh=null;nameMesh=null;}
 function rebuildKeychain(){if(!font||!scene)return;const raw=nameInput.value.trim();if(!raw){removeOldModel();loading.textContent='Type a name to see your keychain.';loading.style.display='block';updatePrice();return;}
- try{removeOldModel();let contours=scalePaths(getContours(raw),76);const basePaths=makeBasePaths(contours,attachment.value);baseMesh=makeBaseMesh(basePaths);const ng=getNameGeometry(contours);const nm=new THREE.MeshStandardMaterial({color:nameColor.hex,roughness:.48,metalness:.01,side:THREE.DoubleSide});nameMesh=new THREE.Mesh(ng,[nm,nm]);nameMesh.position.z=BASE_THICKNESS+.08;nameMesh.castShadow=true;nameMesh.receiveShadow=true;scene.add(baseMesh);scene.add(nameMesh);
+ try{removeOldModel();let contours=scalePaths(getContours(raw),76);const basePaths=makeBasePaths(contours,attachment.value);baseMesh=makeBaseMesh(basePaths);const ng=getNameGeometry(contours);const nm=new THREE.MeshStandardMaterial({color:nameColor.hex,roughness:.72,metalness:0,side:THREE.DoubleSide});nameMesh=new THREE.Mesh(ng,nm);nameMesh.position.z=BASE_THICKNESS+.12;nameMesh.castShadow=true;nameMesh.receiveShadow=true;scene.add(baseMesh);scene.add(nameMesh);
   const bb=new THREE.Box3().setFromObject(baseMesh),center=bb.getCenter(new THREE.Vector3());baseMesh.position.x-=center.x;baseMesh.position.y-=center.y;nameMesh.position.x-=center.x;nameMesh.position.y-=center.y;
   const full=new THREE.Box3().setFromObject(baseMesh);full.expandByObject(nameMesh);const size=full.getSize(new THREE.Vector3()),mid=full.getCenter(new THREE.Vector3()),max=Math.max(size.x,size.y,size.z);camera.position.set(mid.x,mid.y-max*1.65,mid.z+max*1.5);controls.target.copy(mid);controls.update();loading.textContent='';loading.style.display='none';
  }catch(e){console.error('Keychain generation error:',e);loading.textContent='Could not generate this keychain: '+(e&&e.message?e.message:'Please try again.');loading.style.display='block';}
