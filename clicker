@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Clickers | She3DPrints</title>
+<style>
+:root{--milk:#FBF7F4;--oat:#E8DED5;--brown:#684332;--dark:#30251F;--rose:#B98F88;--muted:#82756D;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--milk);color:var(--dark);font-family:Arial,sans-serif;font-size:15px;line-height:1.5}
+header{padding:22px 16px;text-align:center;border-bottom:1px solid var(--oat);background:var(--milk)}
+header h1{margin:0;color:var(--brown);font-size:26px;letter-spacing:.3px}
+header p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.container{max-width:1120px;margin:auto;padding:22px 16px 42px}
+.intro{text-align:center;margin:0 auto 22px;max-width:680px}
+.intro h2{margin:0 0 6px;color:var(--brown);font-size:27px}
+.intro p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:24px;align-items:start}
+.preview-box,.panel{background:#fff;border:1px solid var(--oat);border-radius:16px}
+.preview-box{overflow:hidden;position:sticky;top:14px}
+.preview-title{padding:18px 20px 0;color:var(--brown);font-size:18px;font-weight:bold}
+.viewer{position:relative;margin:12px;background:radial-gradient(ellipse at 50% 42%,#fff 0%,#F5F0EB 75%);border-radius:13px;overflow:hidden;min-height:410px}
+#stage{width:100%;height:410px;display:block;touch-action:none}
+.status{position:absolute;z-index:2;left:12px;top:12px;padding:6px 11px;background:#ffffffdf;border:1px solid var(--oat);border-radius:20px;color:var(--brown);font-size:12px;max-width:calc(100% - 24px)}
+.viewer-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 12px 10px}
+.smallbtn,.choice{border:1px solid #D9CBC1;background:#fff;border-radius:9px;padding:10px 13px;cursor:pointer;color:var(--brown);font:inherit}
+.smallbtn:hover,.choice:hover{border-color:var(--brown)}
+.hint{text-align:center;color:var(--muted);font-size:12px;margin:0 12px 17px}
+.panel{padding:20px;margin-bottom:15px}
+.panel h3{font-size:17px;color:var(--brown);margin:0 0 13px}
+.step{display:inline-grid;place-items:center;width:25px;height:25px;margin-right:7px;border-radius:50%;background:var(--milk);color:var(--brown);font-size:12px}
+.count,.swatches,.type-row{display:flex;gap:9px;flex-wrap:wrap}
+.choice{min-width:75px}
+.choice.active{background:var(--brown);border-color:var(--brown);color:#fff}
+.note,.small{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.55}
+.swatches{align-items:center}
+.swatch-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:55px}
+.swatch{width:36px;height:36px;border-radius:50%;border:2px solid #fff;outline:1px solid #D9CBC1;cursor:pointer;padding:0;flex:0 0 auto}
+.swatch.selected{outline:2px solid var(--brown);outline-offset:3px}
+.swatch-name{font-size:10px;color:var(--muted);text-align:center;max-width:62px;line-height:1.2}
+.selected-name{font-size:12px;color:var(--brown);margin-top:10px;min-height:17px}
+.slot-card{border:1px solid var(--oat);border-radius:12px;padding:14px;margin-top:12px;background:#FFFEFD}
+.slot-head{font-weight:bold;color:var(--brown);margin-bottom:10px}
+label{display:block;font-size:13px;font-weight:bold;color:var(--dark);margin:12px 0 7px}
+select{width:100%;padding:12px;border:1px solid #D9CBC1;border-radius:9px;background:#fff;color:var(--dark);font:inherit}
+.price{background:var(--milk);padding:15px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;color:var(--dark)}
+.price strong{font-size:25px;color:var(--brown)}
+.breakdown{background:#FBF7F4;border:1px solid var(--oat);border-radius:10px;padding:12px;color:var(--muted);font-size:12px;line-height:1.6;white-space:pre-line}
+.order-button{border:0;border-radius:10px;padding:15px;width:100%;background:var(--brown);color:#fff;font-size:15px;font-weight:bold;cursor:pointer;margin-top:14px}
+.order-button:hover{background:#513323}
+.footer-note{text-align:center;color:var(--muted);font-size:11px;padding:18px}
+@media(max-width:760px){.container{padding:16px 12px 30px}.layout{grid-template-columns:1fr}.preview-box{position:relative;top:auto}.viewer{min-height:330px}#stage{height:330px}.intro h2{font-size:24px}.panel{padding:17px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<header><h1>She3DPrints</h1><p>Custom 3D Printed Clickers</p></header>
+<main class="container">
+  <div class="intro"><h2>Design Your Own Clicker</h2><p>Choose your base, colours and keycaps. Turn your clicker around to see your design from every angle.</p></div>
+  <div class="layout">
+    <section class="preview-box">
+      <div class="preview-title">Your 3D Preview</div>
+      <div class="viewer"><div class="status" id="status">Loading your clicker models…</div><canvas id="stage"></canvas></div>
+      <div class="viewer-actions"><button class="smallbtn" id="reset" type="button">Reset view</button><button class="smallbtn" id="zoomIn" type="button">＋ Zoom in</button><button class="smallbtn" id="zoomOut" type="button">－ Zoom out</button></div>
+      <p class="hint">Drag to rotate 360° · Pinch or scroll to zoom</p>
+    </section>
+    <div class="controls-column">
+      <section class="panel">
+        <h3><span class="step">1</span>Choose your base</h3>
+        <div class="count"><button class="choice active" type="button" data-count="1">1 Slot</button><button class="choice" type="button" data-count="2">2 Slots</button><button class="choice" type="button" data-count="3">3 Slots</button></div>
+        <p class="note">1 slot: Rs. 350 · 2 slots: Rs. 500 · 3 slots: Rs. 800</p>
+      </section>
+      <section class="panel">
+        <h3><span class="step">2</span>Choose your base colour</h3>
+        <div id="baseSwatches" class="swatches"></div><div class="selected-name" id="baseSelected"></div>
+      </section>
+      <section class="panel">
+        <h3><span class="step">3</span>Customise each slot</h3>
+        <div id="slots"></div>
+        <p class="note">Letters: Rs. 100 each · Symbols: Rs. 150 each. You can mix letters and symbols in the same clicker.</p>
+      </section>
+      <section class="panel">
+        <h3>Your custom clicker</h3>
+        <div class="price"><span>Estimated total</span><strong id="price">Rs. 450</strong></div>
+        <div class="breakdown" id="breakdown"></div>
+        <button class="order-button" id="order" type="button">Order via WhatsApp</button>
+        <p class="small">Your selected colours and keycap details will be included in your WhatsApp order.</p>
+      </section>
+    </div>
+  </div>
+</main>
+<div class="footer-note">© She3DPrints.lk · Custom 3D Printed Clickers</div>
+<script type="module">
+import * as THREE from 'three';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const WHATSAPP_NUMBER = '94755227557';
+const MODEL_ROOT = 'https://raw.githubusercontent.com/she3dprints/She3DPrints/main/models/';
+const COLOURS = [
+  {name:'Peach Pink',hex:'#E8A0A5'},
+  {name:'Olive Green',hex:'#777B45'},
+  {name:'Milky White',hex:'#F3EFE6'},
+  {name:'Deep Black',hex:'#202020'},
+  {name:'Light Brown',hex:'#A87954'},
+  {name:'Matcha Green',hex:'#A8B98A'}
+];
+const SYMBOLS = [
+  {name:'Star',file:'symbol-1.stl',id:'1'},
+  {name:'Bow',file:'symbol-2.stl',id:'2'},
+  {name:'Flower',file:'symbol-3.stl',id:'3'},
+  {name:'Ice cream',file:'symbol-4.stl',id:'4'},
+  {name:'Coffee cup',file:'symbol-5.stl',id:'5'}
+];
+const BASE_PRICES = {1:350,2:500,3:800};
+const LETTER_PRICE = 100, SYMBOL_PRICE = 150;
+const FIXED_COFFEE_COLOUR = '#684332';
+let count = 1;
+let baseColour = COLOURS[1].hex;
+const slots = [
+ {type:'letter',value:'A',capColour:COLOURS[2].hex,markColour:COLOURS[0].hex},
+ {type:'letter',value:'B',capColour:COLOURS[2].hex,markColour:COLOURS[0].hex},
+ {type:'letter',value:'C',capColour:COLOURS[2].hex,markColour:COLOURS[0].hex}
+];
+
+const canvas = document.querySelector('#stage');
+const statusEl = document.querySelector('#status');
+const renderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1,2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(36,1,0.1,2000);
+camera.position.set(115,100,145);
+const controls = new OrbitControls(camera,renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.075; controls.target.set(0,0,0);
+scene.add(new THREE.HemisphereLight(0xffffff,0x77716a,2.0));
+const keyLight = new THREE.DirectionalLight(0xffffff,2.1); keyLight.position.set(100,150,100); scene.add(keyLight);
+const fillLight = new THREE.DirectionalLight(0xffffff,1.0); fillLight.position.set(-100,55,-100); scene.add(fillLight);
+const loader = new STLLoader();
+const modelRoot = new THREE.Group(); scene.add(modelRoot);
+let baseMesh = null, plainCapGeometry = null, symbolGeometries = {}, modelReady = false;
+let resizeObserver;
+
+function setStatus(message){statusEl.textContent=message;}
+function loadSTL(filename){
+ const url = MODEL_ROOT + filename;
+ return new Promise((resolve,reject)=>loader.load(url,geometry=>{
+   geometry.computeVertexNormals(); geometry.center(); resolve(geometry);
+ },undefined,error=>reject(new Error(filename+' could not be loaded: '+(error?.message||'check the model file path')))));
+}
+function material(hex,roughness=.55){return new THREE.MeshStandardMaterial({color:hex,roughness,metalness:0.02});}
+function clearCapMeshes(){
+ for(const child of [...modelRoot.children]) if(child.userData.isCapPart){modelRoot.remove(child);if(child.geometry && child.geometry!==plainCapGeometry && !Object.values(symbolGeometries).includes(child.geometry)) child.geometry.dispose();if(child.material)child.material.dispose();}
+}
+function getBaseBox(){modelRoot.updateMatrixWorld(true);return new THREE.Box3().setFromObject(baseMesh);}
+function fitCamera(){
+ modelRoot.updateMatrixWorld(true);
+ const box = new THREE.Box3().setFromObject(modelRoot);
+ if(box.isEmpty()) return;
+ const size=box.getSize(new THREE.Vector3());
+ const centre=box.getCenter(new THREE.Vector3());
+ const max=Math.max(size.x,size.y,size.z,20);
+ controls.target.copy(centre);
+ camera.position.set(centre.x+max*1.75,centre.y+max*1.5,centre.z+max*2.05);
+ camera.near=Math.max(.1,max/100);camera.far=max*100;camera.updateProjectionMatrix();controls.update();
+}
+function makeFaceTexture(text,colour){
+ const c=document.createElement('canvas');c.width=512;c.height=512;
+ const ctx=c.getContext('2d');ctx.clearRect(0,0,512,512);ctx.fillStyle=colour;
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 340px Arial, sans-serif';ctx.fillText(text,256,264);
+ const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;return texture;
+}
+function addMark(slot,index,x,capY){
+ const markColour = slot.type==='symbol' && slot.value==='5' ? FIXED_COFFEE_COLOUR : slot.markColour;
+ if(slot.type==='letter'){
+   const texture=makeFaceTexture(slot.value,markColour);
+   const face=new THREE.Mesh(new THREE.PlaneGeometry(12,12),new THREE.MeshBasicMaterial({map:texture,transparent:true,side:THREE.DoubleSide}));
+   face.rotation.x=-Math.PI/2;face.position.set(x,capY+5,0);face.userData.isCapPart=true;modelRoot.add(face);return;
+ }
+ const symbolGeo=symbolGeometries[slot.value];
+ if(!symbolGeo){console.warn('Missing symbol geometry',slot.value);return;}
+ const geometry=symbolGeo;
+ const mesh=new THREE.Mesh(geometry,material(markColour,.48));
+ mesh.rotation.x=-Math.PI/2;
+ const box=new THREE.Box3().setFromBufferAttribute(new THREE.BufferAttribute(geometry.attributes.position.array,3));
+ const size=box.getSize(new THREE.Vector3());
+ const maxDim=Math.max(size.x,size.y,size.z,0.001);
+ const scale=10/maxDim;
+ mesh.scale.setScalar(scale);
+ mesh.position.set(x,capY+5,0);
+ mesh.userData.isCapPart=true;modelRoot.add(mesh);
+}
+function addCaps(){
+ if(!modelReady||!baseMesh||!plainCapGeometry)return;
+ clearCapMeshes();
+ const bb=getBaseBox();
+ const size=bb.getSize(new THREE.Vector3());
+ const spacing=Math.min((size.x/Math.max(count,1))*.82,22);
+ const capY=bb.max.y+5;
+ for(let i=0;i<count;i++){
+   const slot=slots[i];const x=(i-(count-1)/2)*spacing;
+   const cap=new THREE.Mesh(plainCapGeometry,material(slot.capColour,.5));
+   cap.rotation.x=-Math.PI/2;cap.scale.setScalar(.78);cap.position.set(x,capY,0);cap.userData.isCapPart=true;modelRoot.add(cap);
+   addMark(slot,i,x,capY);
+ }
+}
+async function loadBase(n,initial=false){
+ setStatus('Loading '+n+'-slot base…');
+ const geometry=await loadSTL(`base-${n}-slot.stl`);
+ if(baseMesh){modelRoot.remove(baseMesh);baseMesh.geometry.dispose();baseMesh.material.dispose();}
+ baseMesh=new THREE.Mesh(geometry,material(baseColour,.62));
+ baseMesh.rotation.x=-Math.PI/2;modelRoot.add(baseMesh);
+ modelReady=true;addCaps();fitCamera();setStatus('Your 3D clicker is ready');
+}
+async function initialise(){
+ try{
+   setStatus('Loading base and keycap models…');
+   const [capGeo,...symbolGeos]=await Promise.all([
+     loadSTL('keycap-plain.stl'),
+     ...SYMBOLS.map(s=>loadSTL(s.file))
+   ]);
+   plainCapGeometry=capGeo;
+   SYMBOLS.forEach((s,i)=>symbolGeometries[s.id]=symbolGeos[i]);
+   await loadBase(count,true);
+   render();
+ }catch(error){console.error(error);modelReady=false;setStatus('A 3D model could not load. Check the model links in the original She3DPrints repository.');}
+}
+
+function createSwatches(container,selected,callback){
+ container.innerHTML='';
+ COLOURS.forEach(colour=>{
+   const wrap=document.createElement('div');wrap.className='swatch-wrap';
+   const button=document.createElement('button');button.type='button';button.className='swatch'+(colour.hex.toLowerCase()===selected.toLowerCase()?' selected':'');
+   button.style.backgroundColor=colour.hex;button.title=colour.name;button.setAttribute('aria-label',colour.name);
+   button.addEventListener('click',()=>callback(colour.hex));
+   const name=document.createElement('span');name.className='swatch-name';name.textContent=colour.name;
+   wrap.append(button,name);container.append(wrap);
+ });
+}
+function colourName(hex){return COLOURS.find(c=>c.hex.toLowerCase()===hex.toLowerCase())?.name||hex;}
+function renderSlots(){
+ const area=document.querySelector('#slots');area.innerHTML='';
+ for(let i=0;i<count;i++){
+   const slot=slots[i],card=document.createElement('div');card.className='slot-card';
+   const head=document.createElement('div');head.className='slot-head';head.textContent='Slot '+(i+1);card.append(head);
+   const typeRow=document.createElement('div');typeRow.className='type-row';
+   ['letter','symbol'].forEach(type=>{const b=document.createElement('button');b.type='button';b.className='choice'+(slot.type===type?' active':'');b.textContent=type==='letter'?'Letter':'Symbol';b.addEventListener('click',()=>{slot.type=type;slot.value=type==='letter'?'A':'1';render();});typeRow.append(b);});
+   card.append(typeRow);
+   const selectLabel=document.createElement('label');selectLabel.textContent=slot.type==='letter'?'Choose a letter':'Choose a symbol';card.append(selectLabel);
+   const select=document.createElement('select');
+   const options=slot.type==='letter'?Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(v=>({name:v,id:v})):SYMBOLS.map(s=>({name:s.name,id:s.id}));
+   options.forEach(opt=>{const o=document.createElement('option');o.value=opt.id;o.textContent=opt.name;select.append(o);});select.value=slot.value;
+   select.addEventListener('change',()=>{slot.value=select.value;render();});card.append(select);
+   const capLabel=document.createElement('label');capLabel.textContent='Keycap colour';card.append(capLabel);
+   const capSwatches=document.createElement('div');capSwatches.className='swatches';card.append(capSwatches);
+   createSwatches(capSwatches,slot.capColour,hex=>{slot.capColour=hex;render();});
+   const capSelected=document.createElement('div');capSelected.className='selected-name';capSelected.textContent='Selected: '+colourName(slot.capColour);card.append(capSelected);
+   if(slot.type==='letter'||slot.value!=='5'){
+     const markLabel=document.createElement('label');markLabel.textContent=slot.type==='letter'?'Letter colour':'Symbol colour';card.append(markLabel);
+     const markSwatches=document.createElement('div');markSwatches.className='swatches';card.append(markSwatches);
+     createSwatches(markSwatches,slot.markColour,hex=>{slot.markColour=hex;render();});
+     const markSelected=document.createElement('div');markSelected.className='selected-name';markSelected.textContent='Selected: '+colourName(slot.markColour);card.append(markSelected);
+   }else{
+     const fixed=document.createElement('div');fixed.className='selected-name';fixed.textContent='Coffee cup colour: fixed';card.append(fixed);
+   }
+   area.append(card);
+ }
+}
+function calculate(){
+ let letters=0,symbols=0;
+ slots.slice(0,count).forEach(s=>s.type==='letter'?letters++:symbols++);
+ return {letters,symbols,total:BASE_PRICES[count]+letters*LETTER_PRICE+symbols*SYMBOL_PRICE};
+}
+function render(){
+ document.querySelectorAll('[data-count]').forEach(b=>b.classList.toggle('active',Number(b.dataset.count)===count));
+ createSwatches(document.querySelector('#baseSwatches'),baseColour,hex=>{baseColour=hex;render();});
+ document.querySelector('#baseSelected').textContent='Selected: '+colourName(baseColour);
+ if(baseMesh)baseMesh.material.color.set(baseColour);
+ renderSlots();addCaps();
+ const p=calculate();document.querySelector('#price').textContent='Rs. '+p.total;
+ document.querySelector('#breakdown').textContent=`Base (${count} slot${count===1?'':'s'}): Rs. ${BASE_PRICES[count]}\nLetters: ${p.letters} × Rs. ${LETTER_PRICE} = Rs. ${p.letters*LETTER_PRICE}\nSymbols: ${p.symbols} × Rs. ${SYMBOL_PRICE} = Rs. ${p.symbols*SYMBOL_PRICE}\nTotal: Rs. ${p.total}`;
+}
+
+document.querySelectorAll('[data-count]').forEach(button=>button.addEventListener('click',async()=>{
+ const next=Number(button.dataset.count);if(next===count)return;count=next;render();
+ try{await loadBase(count);}catch(error){console.error(error);setStatus('Could not load the '+count+'-slot base.');}
+}));
+document.querySelector('#reset').addEventListener('click',fitCamera);
+document.querySelector('#zoomIn').addEventListener('click',()=>{camera.position.multiplyScalar(.82);controls.update();});
+document.querySelector('#zoomOut').addEventListener('click',()=>{camera.position.multiplyScalar(1.22);controls.update();});
+document.querySelector('#order').addEventListener('click',()=>{
+ const p=calculate();
+ const base=colourName(baseColour);
+ const details=slots.slice(0,count).map((s,i)=>{
+   const item=s.type==='letter'?`Letter ${s.value}`:SYMBOLS.find(x=>x.id===s.value)?.name||'Symbol';
+   return `Slot ${i+1}: ${item}\nKeycap colour: ${colourName(s.capColour)}${s.type==='letter'?`\nLetter colour: ${colourName(s.markColour)}`:s.value==='5'?'\nCoffee cup colour: fixed':`\nSymbol colour: ${colourName(s.markColour)}`}`;
+ }).join('\n\n');
+ const message=`SHE3DPRINTS – CUSTOM CLICKER ORDER\n\nHello! I would like to order a custom clicker.\n\nBase: ${count} slot(s)\nBase colour: ${base}\n\n${details}\n\nBase price: Rs. ${BASE_PRICES[count]}\nLetter keycaps: ${p.letters} × Rs. ${LETTER_PRICE}\nSymbol keycaps: ${p.symbols} × Rs. ${SYMBOL_PRICE}\nTOTAL: Rs. ${p.total}`;
+ window.open('https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(message),'_blank');
+});
+function resize(){const w=canvas.clientWidth||320,h=canvas.clientHeight||330;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+resizeObserver=new ResizeObserver(resize);resizeObserver.observe(canvas);
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
+animate();initialise();
+</script>
+</body>
+</html>
